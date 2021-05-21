@@ -1,0 +1,13 @@
+<resources>
+    <string name="app_name">Tealium-Adobe Visitor API</string>
+    <string name="no_visitor">No Visitor</string>
+    <string name="link_existing_ecid">Link Known Id</string>
+    <string name="clear_visitor">Clear Visitor</string>
+    <string name="track_event">Track Event</string>
+    <string name="refresh">Refresh Visitor</string>
+    <string name="edit_known_id">Known Id (e.g. email)</string>
+    <string-array name="api_options">
+        <item>Java</item>
+        <item>Kotlin</item>
+    </string-array>
+</resources>

@@ -1,0 +1,5 @@
+include ':adobevisitorjava'
+include ':adobevisitorkotlin'
+include ':adobevisitorapi'
+include ':app'
+rootProject.name = "Tealium-Adobe Visitor API"
