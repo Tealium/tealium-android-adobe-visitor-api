@@ -11,12 +11,20 @@ import com.tealium.adobe.api.AdobeAuthState;
 import com.tealium.adobe.api.AdobeExperienceCloudIdService;
 import com.tealium.adobe.api.AdobeVisitor;
 import com.tealium.adobe.api.AdobeVisitorAPI;
+import com.tealium.adobe.api.Constants;
 import com.tealium.adobe.api.ResponseListener;
+import com.tealium.internal.MessageRouter;
+import com.tealium.internal.QueryParameterProvider;
 import com.tealium.internal.data.Dispatch;
 import com.tealium.internal.listeners.PopulateDispatchListener;
+import com.tealium.internal.messengers.QueryParametersUpdatedMessenger;
 import com.tealium.library.DataSources;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
@@ -27,7 +35,7 @@ import java.util.concurrent.TimeUnit;
  * The ECID will be added during the Dispatch population phase - population could be delayed on
  * first launch if no known ECID is provided, and requests are required to fetch a new ECID.
  */
-public final class AdobeVisitorModule implements PopulateDispatchListener {
+public final class AdobeVisitorModule implements PopulateDispatchListener, QueryParameterProvider {
 
     private static AdobeVisitorModule INSTANCE = null;
     private static final String ADOBE_VISITOR_SHARED_PREFS_NAME = "tealium.adobevisitor";
@@ -38,6 +46,7 @@ public final class AdobeVisitorModule implements PopulateDispatchListener {
     private final SharedPreferences mSharedPreferences;
     private final int mMaxRetries;
     private final Long mRequestTimeoutMs = 1000L;
+    private MessageRouter mMessageRouter;
 
     private volatile CountDownLatch mRetryLatch = null;
     private volatile AdobeVisitor mVisitor;
@@ -158,6 +167,10 @@ public final class AdobeVisitorModule implements PopulateDispatchListener {
         return mVisitor;
     }
 
+    void setMessageRouter(MessageRouter messageRouter) {
+        mMessageRouter = messageRouter;
+    }
+
     /**
      * Updates the in-memory visitor and saves to disk.
      * Adds the registered Tealium instances' persistent data sources.
@@ -167,6 +180,25 @@ public final class AdobeVisitorModule implements PopulateDispatchListener {
     void setVisitor(AdobeVisitor visitor) {
         mVisitor = visitor;
         AdobeVisitor.toSharedPreferences(mSharedPreferences, visitor);
+        Map<String, String[]> visitorParams = provideParameters();
+        if (mMessageRouter != null) {
+            mMessageRouter.routeBackground(new QueryParametersUpdatedMessenger(visitorParams));
+        }
+    }
+
+    @Override
+    public Map<String, String[]> provideParameters() {
+        Map<String, String[]> visitorParams = new HashMap<>();
+        if (mVisitor != null) {
+            final String visitor =
+                    Constants.QP_MCID + "=" + mVisitor.getExperienceCloudId() + Constants.QP_SEPARATOR +
+                            Constants.QP_MCORGID + "=" + mAdobeOrgId + Constants.QP_SEPARATOR +
+                            Constants.QP_TS + "=" + System.currentTimeMillis() / 1000;
+            visitorParams.put(Constants.QP_ADOBE_MC, new String[]{visitor});
+            return visitorParams;
+        } else {
+            return null;
+        }
     }
 
     private void fetchInitialVisitor(String customVisitorId, String dataProviderId, Integer authState) {

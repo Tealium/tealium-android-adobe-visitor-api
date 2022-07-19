@@ -446,4 +446,30 @@ class AdobeVisitorModuleTests {
             mockEditor.apply()
         }
     }
+
+    @Test
+    fun appendVisitorQueryParams() {
+        every { AdobeVisitor.fromSharedPreferences(mockSharedPreferences) } returns mockVisitor
+
+        val adobeVisitorModule = AdobeVisitorModule(
+            adobeOrgId,
+            mockAdobeService,
+            mockSharedPreferences,
+            0,
+            null,
+            null,
+            null,
+            null
+        )
+
+        adobeVisitorModule.setMessageRouter(mockk())
+
+        val encodedParams = adobeVisitorModule.provideParameters()
+
+        if (encodedParams != null) {
+            encodedParams["adobe_mc"]?.let {
+                assertTrue(it[0].contains("MCID=ecid|MCORGID=orgId|TS="))
+            }
+        }
+    }
 }

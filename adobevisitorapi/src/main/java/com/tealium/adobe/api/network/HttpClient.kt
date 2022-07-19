@@ -24,7 +24,7 @@ class HttpClient @JvmOverloads constructor(
         var connected = false
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             connectivityManager.allNetworks.forEach { network ->
-                connectivityManager.getNetworkInfo(network).apply {
+                connectivityManager.getNetworkInfo(network)?.apply {
                     connected = connected or isConnected
                 }
             }

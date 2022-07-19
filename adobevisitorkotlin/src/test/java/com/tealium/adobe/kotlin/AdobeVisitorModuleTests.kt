@@ -5,6 +5,7 @@ import com.tealium.adobe.api.*
 import com.tealium.core.Logger
 import com.tealium.core.TealiumConfig
 import com.tealium.core.TealiumContext
+import com.tealium.core.messaging.MessengerService
 import io.mockk.*
 import io.mockk.impl.annotations.MockK
 import io.mockk.impl.annotations.RelaxedMockK
@@ -38,6 +39,9 @@ class AdobeVisitorModuleTests {
     @RelaxedMockK
     lateinit var mockAdobeListener: ResponseListener<AdobeVisitor>
 
+    @RelaxedMockK
+    lateinit var mockMessengerService: MessengerService
+
     @Before
     fun setUp() {
         MockKAnnotations.init(this)
@@ -63,6 +67,8 @@ class AdobeVisitorModuleTests {
         every { mockVisitor.region } returns 1
         every { mockVisitor.blob } returns "blob"
         every { mockVisitor.nextRefresh } returns Date(Long.MAX_VALUE)
+
+        every { mockTealiumContext.events } returns mockMessengerService
 
         mockkObject(Logger)
         every {
@@ -443,6 +449,25 @@ class AdobeVisitorModuleTests {
             mockSharedPreferences.edit()
             mockEditor.clear()
             mockEditor.apply()
+        }
+    }
+
+    @Test
+    fun appendVisitorQueryParams() {
+        every { AdobeVisitor.fromSharedPreferences(mockSharedPreferences) } returns mockVisitor
+
+        val adobeVisitorModule = AdobeVisitorModule(
+            mockTealiumContext,
+            mockAdobeService,
+            mockSharedPreferences
+        )
+
+        val encodedParams = adobeVisitorModule.provideParameters()
+
+        encodedParams[QP_ADOBE_MC]?.let {
+            assertTrue(
+                it[0].contains("MCID=ecid|MCORGID=orgId|TS=")
+            )
         }
     }
 }
