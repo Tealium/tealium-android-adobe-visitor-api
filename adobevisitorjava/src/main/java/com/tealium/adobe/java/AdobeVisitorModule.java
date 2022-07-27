@@ -46,7 +46,7 @@ public final class AdobeVisitorModule implements PopulateDispatchListener, Query
     private final SharedPreferences mSharedPreferences;
     private final int mMaxRetries;
     private final Long mRequestTimeoutMs = 1000L;
-    private MessageRouter mMessageRouter;
+    private QueryParameterProvider.QueryParameterUpdatedNotifier mQueryParameterUpdatedNotifier;
 
     private volatile CountDownLatch mRetryLatch = null;
     private volatile AdobeVisitor mVisitor;
@@ -167,8 +167,9 @@ public final class AdobeVisitorModule implements PopulateDispatchListener, Query
         return mVisitor;
     }
 
-    void setMessageRouter(MessageRouter messageRouter) {
-        mMessageRouter = messageRouter;
+    @Override
+    public void setQueryParameterUpdatedNotifier(QueryParameterUpdatedNotifier queryParameterUpdatedNotifier) {
+        mQueryParameterUpdatedNotifier = queryParameterUpdatedNotifier;
     }
 
     /**
@@ -181,9 +182,7 @@ public final class AdobeVisitorModule implements PopulateDispatchListener, Query
         mVisitor = visitor;
         AdobeVisitor.toSharedPreferences(mSharedPreferences, visitor);
         Map<String, String[]> visitorParams = provideParameters();
-        if (mMessageRouter != null) {
-            mMessageRouter.routeBackground(new QueryParametersUpdatedMessenger(visitorParams));
-        }
+        mQueryParameterUpdatedNotifier.onNotifyUpdatedParameters(visitorParams);
     }
 
     @Override
