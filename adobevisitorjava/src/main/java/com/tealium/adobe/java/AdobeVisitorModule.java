@@ -13,15 +13,11 @@ import com.tealium.adobe.api.AdobeVisitor;
 import com.tealium.adobe.api.AdobeVisitorAPI;
 import com.tealium.adobe.api.Constants;
 import com.tealium.adobe.api.ResponseListener;
-import com.tealium.internal.MessageRouter;
 import com.tealium.internal.QueryParameterProvider;
 import com.tealium.internal.data.Dispatch;
 import com.tealium.internal.listeners.PopulateDispatchListener;
-import com.tealium.internal.messengers.QueryParametersUpdatedMessenger;
 import com.tealium.library.DataSources;
 
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -46,7 +42,6 @@ public final class AdobeVisitorModule implements PopulateDispatchListener, Query
     private final SharedPreferences mSharedPreferences;
     private final int mMaxRetries;
     private final Long mRequestTimeoutMs = 1000L;
-    private QueryParameterProvider.QueryParameterUpdatedNotifier mQueryParameterUpdatedNotifier;
 
     private volatile CountDownLatch mRetryLatch = null;
     private volatile AdobeVisitor mVisitor;
@@ -167,10 +162,6 @@ public final class AdobeVisitorModule implements PopulateDispatchListener, Query
         return mVisitor;
     }
 
-    @Override
-    public void setQueryParameterUpdatedNotifier(QueryParameterUpdatedNotifier queryParameterUpdatedNotifier) {
-        mQueryParameterUpdatedNotifier = queryParameterUpdatedNotifier;
-    }
 
     /**
      * Updates the in-memory visitor and saves to disk.
@@ -181,23 +172,6 @@ public final class AdobeVisitorModule implements PopulateDispatchListener, Query
     void setVisitor(AdobeVisitor visitor) {
         mVisitor = visitor;
         AdobeVisitor.toSharedPreferences(mSharedPreferences, visitor);
-        Map<String, String[]> visitorParams = provideParameters();
-        mQueryParameterUpdatedNotifier.onNotifyUpdatedParameters(visitorParams);
-    }
-
-    @Override
-    public Map<String, String[]> provideParameters() {
-        Map<String, String[]> visitorParams = new HashMap<>();
-        if (mVisitor != null) {
-            final String visitor =
-                    Constants.QP_MCID + "=" + mVisitor.getExperienceCloudId() + Constants.QP_SEPARATOR +
-                            Constants.QP_MCORGID + "=" + mAdobeOrgId + Constants.QP_SEPARATOR +
-                            Constants.QP_TS + "=" + System.currentTimeMillis() / 1000;
-            visitorParams.put(Constants.QP_ADOBE_MC, new String[]{visitor});
-            return visitorParams;
-        } else {
-            return null;
-        }
     }
 
     private void fetchInitialVisitor(String customVisitorId, String dataProviderId, Integer authState) {
@@ -259,6 +233,39 @@ public final class AdobeVisitorModule implements PopulateDispatchListener, Query
         }
         if (mVisitor != null) {
             dispatch.put(ADOBE_VISITOR_KEY, mVisitor.getExperienceCloudId());
+        }
+    }
+
+    @Override
+    public Map<String, String[]> provideParameters() {
+        Map<String, String[]> visitorParams = new HashMap<>();
+        if (mVisitor != null) {
+            final String visitor =
+                    Constants.QP_MCID + "=" + mVisitor.getExperienceCloudId() + Constants.QP_SEPARATOR +
+                            Constants.QP_MCORGID + "=" + mAdobeOrgId + Constants.QP_SEPARATOR +
+                            Constants.QP_TS + "=" + System.currentTimeMillis() / 1000;
+            visitorParams.put(Constants.QP_ADOBE_MC, new String[]{visitor});
+            return visitorParams;
+        }
+
+        if (mRetryLatch == null) {
+            fetchInitialVisitor(null, null, null);
+        }
+        try {
+            // Wait for retries to be completed - max timeout time + buffer
+            mRetryLatch.await(mRequestTimeoutMs * (mMaxRetries + 1), TimeUnit.MILLISECONDS);
+        } catch (InterruptedException iex) {
+            mRetryLatch.countDown();
+        }
+        if (mVisitor != null) {
+            final String visitor =
+                    Constants.QP_MCID + "=" + mVisitor.getExperienceCloudId() + Constants.QP_SEPARATOR +
+                            Constants.QP_MCORGID + "=" + mAdobeOrgId + Constants.QP_SEPARATOR +
+                            Constants.QP_TS + "=" + System.currentTimeMillis() / 1000;
+            visitorParams.put(Constants.QP_ADOBE_MC, new String[]{visitor});
+            return visitorParams;
+        } else {
+            return null;
         }
     }
 

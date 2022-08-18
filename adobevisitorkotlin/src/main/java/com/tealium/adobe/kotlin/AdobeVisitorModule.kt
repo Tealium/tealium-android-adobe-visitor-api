@@ -6,7 +6,6 @@ import android.content.SharedPreferences
 import com.tealium.adobe.api.*
 import com.tealium.adobe.api.network.HttpClient
 import com.tealium.core.*
-import com.tealium.core.messaging.QueryParametersUpdatedMessenger
 import kotlinx.coroutines.*
 import kotlinx.coroutines.Dispatchers
 import java.util.*
@@ -33,7 +32,7 @@ class AdobeVisitorModule(
     dataProviderId: String? = context.config.adobeVisitorDataProviderId,
     @AdobeAuthState authState: Int? = context.config.adobeVisitorAuthState,
     customVisitorId: String? = context.config.adobeVisitorCustomVisitorId
-) : Collector, QueryParamProvider {
+) : Collector, QueryParameterProvider {
 
     override var enabled: Boolean = true
     override val name: String = MODULE_NAME
@@ -47,7 +46,6 @@ class AdobeVisitorModule(
             value?.let {
                 AdobeVisitor.toSharedPreferences(sharedPreferences, it)
             } ?: sharedPreferences.edit().clear().apply()
-            context.events.send(QueryParametersUpdatedMessenger())
         }
 
     val adobeOrgId = context.config.adobeVisitorOrgId
@@ -138,8 +136,16 @@ class AdobeVisitorModule(
         )
     }
 
-    override fun provideParameters(): Map<String, List<String>> {
-        return _visitor?.let { v ->
+    override suspend fun provideParameters(): Map<String, List<String>> {
+        if (visitor == null && maxRetries > 0) {
+            val deferred = fetchInitialVisitorId()
+            if (!deferred.isCompleted) {
+                Logger.dev(BuildConfig.TAG, "Awaiting ecid")
+                deferred.await()
+            }
+        }
+
+        return visitor?.let { v ->
             mapOf(
                 QP_ADOBE_MC to listOf(
                     "$QP_MCID=${v.experienceCloudId}$QP_SEPARATOR" +
@@ -147,7 +153,7 @@ class AdobeVisitorModule(
                             "$QP_TS=${System.currentTimeMillis() / 1000}"
                 )
             )
-        } ?: mapOf() // should be null? change return type
+        } ?: emptyMap()
     }
 
     override suspend fun collect(): Map<String, Any> {

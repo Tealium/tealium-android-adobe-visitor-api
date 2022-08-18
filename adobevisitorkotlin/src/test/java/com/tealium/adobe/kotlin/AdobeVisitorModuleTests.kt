@@ -379,7 +379,8 @@ class AdobeVisitorModuleTests {
             "knownId",
             "1",
             AdobeAuthState.AUTH_STATE_UNKNOWN,
-            mockAdobeListener)
+            mockAdobeListener
+        )
 
         assertSame(newVisitor, adobeVisitorModule.visitor)
         verify {
@@ -388,7 +389,8 @@ class AdobeVisitorModuleTests {
                 "ecid",
                 "1",
                 AdobeAuthState.AUTH_STATE_UNKNOWN,
-                capturedListener.captured)
+                capturedListener.captured
+            )
             mockAdobeListener.success(newVisitor)
         }
     }
@@ -419,7 +421,8 @@ class AdobeVisitorModuleTests {
             "knownId",
             "1",
             AdobeAuthState.AUTH_STATE_UNKNOWN,
-        mockAdobeListener)
+            mockAdobeListener
+        )
 
         assertSame(mockVisitor, adobeVisitorModule.visitor)
         verify {
@@ -428,7 +431,8 @@ class AdobeVisitorModuleTests {
                 "ecid",
                 "1",
                 AdobeAuthState.AUTH_STATE_UNKNOWN,
-                capturedListener.captured)
+                capturedListener.captured
+            )
             mockAdobeListener.failure(ErrorCode.ERROR_FAILED_REQUEST, null)
         }
     }
@@ -453,7 +457,7 @@ class AdobeVisitorModuleTests {
     }
 
     @Test
-    fun appendVisitorQueryParams() {
+    fun appendVisitorQueryParams(): Unit = runBlocking {
         every { AdobeVisitor.fromSharedPreferences(mockSharedPreferences) } returns mockVisitor
 
         val adobeVisitorModule = AdobeVisitorModule(
@@ -464,6 +468,7 @@ class AdobeVisitorModuleTests {
 
         val encodedParams = adobeVisitorModule.provideParameters()
 
+        assertTrue(encodedParams.containsKey(QP_ADOBE_MC))
         encodedParams[QP_ADOBE_MC]?.let {
             assertTrue(
                 it[0].contains("MCID=ecid|MCORGID=orgId|TS=")
