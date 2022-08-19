@@ -2,6 +2,7 @@ package com.tealium.adobe.java;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.net.Uri;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
@@ -18,6 +19,9 @@ import com.tealium.internal.data.Dispatch;
 import com.tealium.internal.listeners.PopulateDispatchListener;
 import com.tealium.library.DataSources;
 
+import java.net.MalformedURLException;
+import java.net.URISyntaxException;
+import java.net.URL;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -172,6 +176,27 @@ public final class AdobeVisitorModule implements PopulateDispatchListener, Query
     void setVisitor(AdobeVisitor visitor) {
         mVisitor = visitor;
         AdobeVisitor.toSharedPreferences(mSharedPreferences, visitor);
+    }
+
+    URL decorateUrl(URL url) {
+        final Map<String, String[]> params = provideParameters();
+        if (params == null || params.isEmpty()) {
+            return url;
+        }
+
+        try {
+            final Uri.Builder uriBuilder = Uri.parse(url.toURI().toString()).buildUpon();
+            for (Map.Entry<String, String[]> entry : params.entrySet()) {
+                for (String item : entry.getValue()) {
+                    uriBuilder.appendQueryParameter(entry.getKey(), item);
+                }
+            }
+            return new URL(uriBuilder.build().toString());
+        } catch (MalformedURLException | URISyntaxException e) {
+            Log.d(BuildConfig.TAG, "Error decorating URL: " + e.getMessage());
+            return null;
+        }
+
     }
 
     private void fetchInitialVisitor(String customVisitorId, String dataProviderId, Integer authState) {

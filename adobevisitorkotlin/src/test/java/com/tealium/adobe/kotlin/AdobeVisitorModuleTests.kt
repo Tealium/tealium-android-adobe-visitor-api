@@ -1,6 +1,7 @@
 package com.tealium.adobe.kotlin
 
 import android.content.SharedPreferences
+import android.net.Uri
 import com.tealium.adobe.api.*
 import com.tealium.core.Logger
 import com.tealium.core.TealiumConfig
@@ -14,6 +15,7 @@ import kotlinx.coroutines.runBlocking
 import org.junit.Assert.*
 import org.junit.Before
 import org.junit.Test
+import java.net.URL
 import java.util.*
 
 class AdobeVisitorModuleTests {
@@ -474,5 +476,27 @@ class AdobeVisitorModuleTests {
                 it[0].contains("MCID=ecid|MCORGID=orgId|TS=")
             )
         }
+    }
+
+    @Test
+    fun generateUrlWithVisitorQueryParams(): Unit = runBlocking {
+        every { AdobeVisitor.fromSharedPreferences(mockSharedPreferences) } returns mockVisitor
+        val mockUriBuilder = mockk<Uri.Builder>()
+        mockkStatic(Uri::class)
+        every { Uri.parse(any()).buildUpon() } returns mockUriBuilder
+        every { mockUriBuilder.appendQueryParameter(any(), any()) } returns mockUriBuilder
+        every { mockUriBuilder.build() } returns mockk()
+        every { mockUriBuilder.build().toString() } returns "https://tealium.com/?adobe_mc=MCID%3Decid%7CMCORGID%3DorgId%7CTS%3D"
+
+        val adobeVisitorModule = AdobeVisitorModule(
+            mockTealiumContext,
+            mockAdobeService,
+            mockSharedPreferences
+        )
+
+        val url = adobeVisitorModule.decorateUrl(URL("https://tealium.com/"))
+
+        assertTrue(url.toString().contains(QP_ADOBE_MC, ignoreCase = true))
+        assertTrue(url.toString().contains("/?adobe_mc=MCID%3Decid%7CMCORGID%3DorgId%7CTS%3D", ignoreCase = true))
     }
 }

@@ -3,11 +3,13 @@
 package com.tealium.adobe.kotlin
 
 import android.content.SharedPreferences
+import android.net.Uri
 import com.tealium.adobe.api.*
 import com.tealium.adobe.api.network.HttpClient
 import com.tealium.core.*
 import kotlinx.coroutines.*
 import kotlinx.coroutines.Dispatchers
+import java.net.URL
 import java.util.*
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
@@ -122,6 +124,21 @@ class AdobeVisitorModule(
                 AdobeVisitorListener(adobeResponseListener)
             )
         }
+    }
+
+    suspend fun decorateUrl(url: URL) : URL {
+        val params = provideParameters()
+        if (params.isEmpty()) {
+            return url
+        }
+        val uriBuilder = Uri.parse(url.toURI().toString()).buildUpon()
+        params.forEach { entry ->
+            entry.value.forEach { value ->
+                uriBuilder.appendQueryParameter(entry.key, value)
+            }
+        }
+
+        return URL(uriBuilder.build().toString())
     }
 
     private fun refreshExistingAdobeEcid(
