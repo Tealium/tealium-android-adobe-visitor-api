@@ -6,6 +6,7 @@ import com.tealium.adobe.api.AdobeVisitor
 import com.tealium.adobe.api.ResponseListener
 import com.tealium.adobe.java.AdobeVisitorModule
 import com.tealium.library.Tealium
+import java.net.URL
 
 class JavaWrapper(app: Application) : TealiumWrapper {
 
@@ -44,5 +45,9 @@ class JavaWrapper(app: Application) : TealiumWrapper {
 
     override fun clearVisitor() {
         adobeVisitorModule.resetVisitor()
+    }
+
+    override fun decorateUrl(url: String): String {
+        return adobeVisitorModule.decorateUrl(URL(url)).toString()
     }
 }

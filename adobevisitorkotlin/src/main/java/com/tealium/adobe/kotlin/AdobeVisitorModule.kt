@@ -67,7 +67,8 @@ class AdobeVisitorModule(
         val ecid = _visitor?.experienceCloudId
         if (ecid != null) {
             if (dataProviderId != null &&
-                customVisitorId != null) {
+                customVisitorId != null
+            ) {
                 visitorApi.linkEcidToKnownIdentifier(
                     customVisitorId,
                     ecid,
@@ -126,10 +127,10 @@ class AdobeVisitorModule(
         }
     }
 
-    suspend fun decorateUrl(url: URL) : URL {
+    fun decorateUrl(url: URL): URL = runBlocking {
         val params = provideParameters()
         if (params.isEmpty()) {
-            return url
+            return@runBlocking url
         }
         val uriBuilder = Uri.parse(url.toURI().toString()).buildUpon()
         params.forEach { entry ->
@@ -138,7 +139,7 @@ class AdobeVisitorModule(
             }
         }
 
-        return URL(uriBuilder.build().toString())
+        return@runBlocking URL(uriBuilder.build().toString())
     }
 
     private fun refreshExistingAdobeEcid(
@@ -187,14 +188,23 @@ class AdobeVisitorModule(
         } ?: emptyMap()
     }
 
-    private suspend fun fetchInitialVisitorId(customVisitorId: String? = null, dataProviderId: String? = null, authState: Int? = null): Deferred<AdobeVisitor?> =
+    private suspend fun fetchInitialVisitorId(
+        customVisitorId: String? = null,
+        dataProviderId: String? = null,
+        authState: Int? = null
+    ): Deferred<AdobeVisitor?> =
         autoFetchVisitorDeferred
             ?: coroutineScope {
                 async {
                     for (i in 1..maxRetries) {
                         Logger.dev(BuildConfig.TAG, "Attempt $i")
                         try {
-                            visitorApi.suspendRequestNewAdobeVisitor(1000, customVisitorId, dataProviderId, authState)?.let {
+                            visitorApi.suspendRequestNewAdobeVisitor(
+                                1000,
+                                customVisitorId,
+                                dataProviderId,
+                                authState
+                            )?.let {
                                 // Return early if valid visitor.
                                 _visitor = it
                                 return@async it
@@ -239,7 +249,12 @@ class AdobeVisitorModule(
         }
     }
 
-    private suspend fun AdobeExperienceCloudIdService.suspendRequestNewAdobeVisitor(timeout: Long, customVisitorId: String? = null, dataProviderId: String? = null, authState: Int? = null): AdobeVisitor? =
+    private suspend fun AdobeExperienceCloudIdService.suspendRequestNewAdobeVisitor(
+        timeout: Long,
+        customVisitorId: String? = null,
+        dataProviderId: String? = null,
+        authState: Int? = null
+    ): AdobeVisitor? =
         suspendCancellableCoroutine { cont ->
             val listener = AdobeVisitorListener(object : ResponseListener<AdobeVisitor> {
                 override fun success(data: AdobeVisitor) {
@@ -259,8 +274,14 @@ class AdobeVisitorModule(
 
             // use given custom id and data provider if available
             if (customVisitorId != null &&
-                    dataProviderId != null) {
-                visitorApi.requestNewEcidAndLink(customVisitorId, dataProviderId, authState, listener)
+                dataProviderId != null
+            ) {
+                visitorApi.requestNewEcidAndLink(
+                    customVisitorId,
+                    dataProviderId,
+                    authState,
+                    listener
+                )
             } else {
                 visitorApi.requestNewAdobeEcid(listener)
             }

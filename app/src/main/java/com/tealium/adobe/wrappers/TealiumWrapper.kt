@@ -8,4 +8,5 @@ interface TealiumWrapper {
     fun track(eventName: String, data: Map<String, Any>?)
     fun linkExistingEcidToKnownIdentifier(knownId: String, dataProviderId: String, authState: Int?, responseListener: ResponseListener<AdobeVisitor>)
     fun clearVisitor()
+    fun decorateUrl(url: String) : String
 }

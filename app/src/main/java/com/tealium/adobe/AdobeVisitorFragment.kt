@@ -18,6 +18,7 @@ import com.tealium.adobe.api.AdobeVisitor
 import com.tealium.adobe.api.ResponseListener
 import com.tealium.adobe.wrappers.TealiumWrapper
 import org.json.JSONObject
+import java.net.URL
 
 class AdobeVisitorFragment(
     private val wrapper: TealiumWrapper,
@@ -28,6 +29,10 @@ class AdobeVisitorFragment(
     private lateinit var linkExistingVisitorIdButton: Button
 
     private lateinit var visitorInfoTextView: TextView
+
+    private lateinit var decorateUrlEditText: EditText
+    private lateinit var decorateUrlButton: Button
+    private var currentUrl: String = "https://www.example.com"
 
     private val mainHandler = Handler(Looper.getMainLooper())
 
@@ -80,6 +85,13 @@ class AdobeVisitorFragment(
             linkExisting(text)
         }
 
+        decorateUrlEditText = view.findViewById(R.id.decorate_url)
+        decorateUrlButton = view.findViewById(R.id.button_decorate_url)
+        decorateUrlButton.setOnClickListener {
+            val text: String = decorateUrlEditText.text.toString()
+            decorateUrlEditText.setText(decorateUrl(text))
+        }
+
         updateVisitor(visitor)
     }
 
@@ -101,6 +113,10 @@ class AdobeVisitorFragment(
                 responseListener
             )
         }
+    }
+
+    private fun decorateUrl(url: String): String {
+        return wrapper.decorateUrl(url)
     }
 }
 

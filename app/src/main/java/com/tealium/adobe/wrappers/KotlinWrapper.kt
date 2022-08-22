@@ -10,6 +10,7 @@ import com.tealium.adobe.kotlin.adobeVisitorOrgId
 import com.tealium.collectdispatcher.Collect
 import com.tealium.core.*
 import com.tealium.dispatcher.TealiumEvent
+import java.net.URL
 import java.util.*
 
 class KotlinWrapper(app: Application) : TealiumWrapper {
@@ -46,10 +47,19 @@ class KotlinWrapper(app: Application) : TealiumWrapper {
         authState: Int?,
         responseListener: ResponseListener<AdobeVisitor>
     ) {
-        tealium.adobeVisitorApi?.linkEcidToKnownIdentifier(knownId, dataProviderId, authState, responseListener)
+        tealium.adobeVisitorApi?.linkEcidToKnownIdentifier(
+            knownId,
+            dataProviderId,
+            authState,
+            responseListener
+        )
     }
 
     override fun clearVisitor() {
         tealium.adobeVisitorApi?.resetVisitor()
+    }
+
+    override fun decorateUrl(url: String): String {
+        return tealium.adobeVisitorApi?.decorateUrl(URL(url)).toString()
     }
 }

@@ -178,7 +178,7 @@ public final class AdobeVisitorModule implements PopulateDispatchListener, Query
         AdobeVisitor.toSharedPreferences(mSharedPreferences, visitor);
     }
 
-    URL decorateUrl(URL url) {
+    public URL decorateUrl(URL url) {
         final Map<String, String[]> params = provideParameters();
         if (params == null || params.isEmpty()) {
             return url;
