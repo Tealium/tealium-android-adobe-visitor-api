@@ -14,6 +14,7 @@ import com.tealium.adobe.api.AdobeVisitor;
 import com.tealium.adobe.api.AdobeVisitorAPI;
 import com.tealium.adobe.api.Constants;
 import com.tealium.adobe.api.ResponseListener;
+import com.tealium.adobe.api.UrlDecoratorHandler;
 import com.tealium.internal.QueryParameterProvider;
 import com.tealium.internal.data.Dispatch;
 import com.tealium.internal.listeners.PopulateDispatchListener;
@@ -178,10 +179,10 @@ public final class AdobeVisitorModule implements PopulateDispatchListener, Query
         AdobeVisitor.toSharedPreferences(mSharedPreferences, visitor);
     }
 
-    public URL decorateUrl(URL url) {
+    public void decorateUrl(URL url, UrlDecoratorHandler handler) {
         final Map<String, String[]> params = provideParameters();
         if (params == null || params.isEmpty()) {
-            return url;
+            handler.onDecorateUrl(url);
         }
 
         try {
@@ -191,10 +192,9 @@ public final class AdobeVisitorModule implements PopulateDispatchListener, Query
                     uriBuilder.appendQueryParameter(entry.getKey(), item);
                 }
             }
-            return new URL(uriBuilder.build().toString());
+            handler.onDecorateUrl(new URL(uriBuilder.build().toString()));
         } catch (MalformedURLException | URISyntaxException e) {
             Log.d(BuildConfig.TAG, "Error decorating URL: " + e.getMessage());
-            return null;
         }
 
     }

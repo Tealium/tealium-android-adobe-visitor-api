@@ -41,6 +41,7 @@ class AdobeVisitorModule(
 
     private val maxRetries: Int = maxRetries.coerceAtLeast(0)
     private var autoFetchVisitorDeferred: Deferred<AdobeVisitor?>? = null
+    private val backgroundScope = CoroutineScope(Dispatchers.IO)
 
     private var _visitor: AdobeVisitor? = AdobeVisitor.fromSharedPreferences(sharedPreferences)
         set(value) {
@@ -127,19 +128,23 @@ class AdobeVisitorModule(
         }
     }
 
-    fun decorateUrl(url: URL): URL = runBlocking {
-        val params = provideParameters()
-        if (params.isEmpty()) {
-            return@runBlocking url
-        }
-        val uriBuilder = Uri.parse(url.toURI().toString()).buildUpon()
-        params.forEach { entry ->
-            entry.value.forEach { value ->
-                uriBuilder.appendQueryParameter(entry.key, value)
-            }
-        }
+    fun decorateUrl(url: URL, handler: UrlDecoratorHandler) {
+        backgroundScope.launch {
+            val params = provideParameters()
 
-        return@runBlocking URL(uriBuilder.build().toString())
+            val uriBuilder = Uri.parse(url.toURI().toString()).buildUpon()
+
+            if (params.isEmpty()) {
+                handler.onDecorateUrl(url)
+            }
+
+            params.forEach { entry ->
+                entry.value.forEach { value ->
+                    uriBuilder.appendQueryParameter(entry.key, value)
+                }
+            }
+            handler.onDecorateUrl(URL(uriBuilder.build().toString()))
+        }
     }
 
     private fun refreshExistingAdobeEcid(

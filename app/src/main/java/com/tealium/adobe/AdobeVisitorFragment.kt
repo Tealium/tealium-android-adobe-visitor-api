@@ -13,10 +13,13 @@ import android.widget.EditText
 import android.widget.TextView
 import android.widget.Toast
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
 import com.tealium.adobe.api.AdobeAuthState
 import com.tealium.adobe.api.AdobeVisitor
 import com.tealium.adobe.api.ResponseListener
+import com.tealium.adobe.api.UrlDecoratorHandler
 import com.tealium.adobe.wrappers.TealiumWrapper
+import kotlinx.coroutines.launch
 import org.json.JSONObject
 import java.net.URL
 
@@ -89,7 +92,13 @@ class AdobeVisitorFragment(
         decorateUrlButton = view.findViewById(R.id.button_decorate_url)
         decorateUrlButton.setOnClickListener {
             val text: String = decorateUrlEditText.text.toString()
-            decorateUrlEditText.setText(decorateUrl(text))
+            decorateUrl(text, object : UrlDecoratorHandler {
+                override fun onDecorateUrl(url: URL) {
+                    viewLifecycleOwner.lifecycleScope.launch {
+                        decorateUrlEditText.setText(url.toString())
+                    }
+                }
+            })
         }
 
         updateVisitor(visitor)
@@ -115,8 +124,8 @@ class AdobeVisitorFragment(
         }
     }
 
-    private fun decorateUrl(url: String): String {
-        return wrapper.decorateUrl(url)
+    private fun decorateUrl(url: String, handler: UrlDecoratorHandler) {
+        wrapper.decorateUrl(url, handler)
     }
 }
 
