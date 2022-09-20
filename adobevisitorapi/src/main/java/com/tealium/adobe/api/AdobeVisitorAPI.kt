@@ -9,6 +9,8 @@ import org.json.JSONException
 import org.json.JSONObject
 import java.net.URL
 import java.net.URLDecoder
+import java.util.concurrent.Executor
+import java.util.concurrent.Executors
 
 /**
  * Implementation of the [AdobeExperienceCloudIdService] to allow requesting and linking of
@@ -17,7 +19,8 @@ import java.net.URLDecoder
 class AdobeVisitorAPI @JvmOverloads constructor(
     private val context: Context,
     private val orgId: String,
-    private val networkClient: NetworkClient = HttpClient(context)
+    private val executor: Executor = Executors.newSingleThreadExecutor(),
+    private val networkClient: NetworkClient = HttpClient(context, executor)
 ) : AdobeExperienceCloudIdService {
 
     private val demdexUrl = Uri.Builder()

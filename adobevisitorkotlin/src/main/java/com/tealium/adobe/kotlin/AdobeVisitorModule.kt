@@ -11,17 +11,20 @@ import kotlinx.coroutines.*
 import kotlinx.coroutines.Dispatchers
 import java.net.URL
 import java.util.*
+import java.util.concurrent.Executor
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 
 class AdobeVisitorModule(
     private val context: TealiumContext,
+    private val executor: Executor = Dispatchers.IO.asExecutor(),
     private val visitorApi: AdobeExperienceCloudIdService = AdobeVisitorAPI(
         context.config.application,
         context.config.adobeVisitorOrgId ?: "",
+        executor,
         HttpClient(
             context.config.application.applicationContext,
-            Dispatchers.IO.asExecutor()
+            executor
         )
     ),
     private val sharedPreferences: SharedPreferences = context.config.application.getSharedPreferences(

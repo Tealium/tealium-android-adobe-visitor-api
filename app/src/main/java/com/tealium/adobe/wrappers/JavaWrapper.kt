@@ -14,7 +14,8 @@ class JavaWrapper(app: Application) : TealiumWrapper {
     private val tealium: Tealium
     private val adobeVisitorModule: AdobeVisitorModule = AdobeVisitorModule.setUp(
         app.applicationContext,
-        BuildConfig.ADOBE_ORG_ID
+        BuildConfig.ADOBE_ORG_ID,
+        null
     )
 
     override val initialVisitor: AdobeVisitor?
