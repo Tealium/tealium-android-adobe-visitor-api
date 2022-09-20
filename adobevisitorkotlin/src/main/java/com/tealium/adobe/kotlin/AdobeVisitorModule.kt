@@ -17,7 +17,7 @@ import kotlin.coroutines.resumeWithException
 
 class AdobeVisitorModule(
     private val context: TealiumContext,
-    private val executor: Executor = Dispatchers.IO.asExecutor(),
+    private val executor: Executor = context.config.adobeVisitorExecutor ?: Dispatchers.IO.asExecutor(),
     private val visitorApi: AdobeExperienceCloudIdService = AdobeVisitorAPI(
         context.config.application,
         context.config.adobeVisitorOrgId ?: "",
