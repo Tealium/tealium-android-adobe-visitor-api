@@ -277,14 +277,8 @@ public final class AdobeVisitorModule implements PopulateDispatchListener, Query
     @Override
     public void provideParameters(QueryParameterUpdatedNotifier queryParameterUpdatedNotifier) {
         mExecutor.execute(() -> {
-            Map<String, String[]> visitorParams = new HashMap<>();
             if (mVisitor != null) {
-                final String visitor =
-                        Constants.QP_MCID + "=" + mVisitor.getExperienceCloudId() + Constants.QP_SEPARATOR +
-                                Constants.QP_MCORGID + "=" + mAdobeOrgId + Constants.QP_SEPARATOR +
-                                Constants.QP_TS + "=" + System.currentTimeMillis() / 1000;
-                visitorParams.put(Constants.QP_ADOBE_MC, new String[]{visitor});
-                queryParameterUpdatedNotifier.onNotifyUpdatedParameters(visitorParams);
+                queryParameterUpdatedNotifier.onNotifyUpdatedParameters(visitorParametersToMap());
             }
 
             if (mRetryLatch == null) {
@@ -297,16 +291,20 @@ public final class AdobeVisitorModule implements PopulateDispatchListener, Query
                 mRetryLatch.countDown();
             }
             if (mVisitor != null) {
-                final String visitor =
-                        Constants.QP_MCID + "=" + mVisitor.getExperienceCloudId() + Constants.QP_SEPARATOR +
-                                Constants.QP_MCORGID + "=" + mAdobeOrgId + Constants.QP_SEPARATOR +
-                                Constants.QP_TS + "=" + System.currentTimeMillis() / 1000;
-                visitorParams.put(Constants.QP_ADOBE_MC, new String[]{visitor});
-                queryParameterUpdatedNotifier.onNotifyUpdatedParameters(visitorParams);
+                queryParameterUpdatedNotifier.onNotifyUpdatedParameters(visitorParametersToMap());
             } else {
                 queryParameterUpdatedNotifier.onNotifyUpdatedParameters(null);
             }
         });
+    }
+
+    private Map<String, String[]> visitorParametersToMap() {
+        Map<String, String[]> visitorParams = new HashMap<>();
+        final String visitor = Constants.QP_MCID + "=" + mVisitor.getExperienceCloudId() + Constants.QP_SEPARATOR +
+                Constants.QP_MCORGID + "=" + mAdobeOrgId + Constants.QP_SEPARATOR +
+                Constants.QP_TS + "=" + System.currentTimeMillis() / 1000;
+        visitorParams.put(Constants.QP_ADOBE_MC, new String[]{visitor});
+        return visitorParams;
     }
 
     /**

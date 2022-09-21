@@ -1,7 +1,6 @@
 package com.tealium.adobe.java
 
 import android.content.SharedPreferences
-import android.net.Uri
 import com.tealium.adobe.api.*
 import com.tealium.internal.data.Dispatch
 import com.tealium.library.DataSources
@@ -9,7 +8,6 @@ import com.tealium.library.Tealium
 import io.mockk.*
 import io.mockk.impl.annotations.MockK
 import io.mockk.impl.annotations.RelaxedMockK
-import kotlinx.coroutines.runBlocking
 import org.junit.Assert.*
 import org.junit.Before
 import org.junit.Test
@@ -87,6 +85,7 @@ class AdobeVisitorModuleTests {
                 null,
                 null,
                 null,
+                null,
                 null
             )
 
@@ -106,6 +105,7 @@ class AdobeVisitorModuleTests {
                 null,
                 null,
                 null,
+                null,
                 null
             )
 
@@ -120,6 +120,7 @@ class AdobeVisitorModuleTests {
                 mockAdobeService,
                 mockSharedPreferences,
                 0,
+                null,
                 null,
                 null,
                 null,
@@ -142,6 +143,7 @@ class AdobeVisitorModuleTests {
                 "my_ecid",
                 null,
                 null,
+                null,
                 null
             )
 
@@ -162,7 +164,8 @@ class AdobeVisitorModuleTests {
                 null,
                 "dp",
                 null,
-                "custom"
+                "custom",
+                null
             )
 
         assertNull(adobeVisitorModule.visitor)
@@ -183,7 +186,8 @@ class AdobeVisitorModuleTests {
                 null,
                 "dp",
                 null,
-                "custom"
+                "custom",
+                null
             )
 
         assertNotNull(adobeVisitorModule.visitor)
@@ -201,6 +205,7 @@ class AdobeVisitorModuleTests {
             mockAdobeService,
             mockSharedPreferences,
             0,
+            null,
             null,
             null,
             null,
@@ -222,6 +227,7 @@ class AdobeVisitorModuleTests {
                 mockAdobeService,
                 mockSharedPreferences,
                 0,
+                null,
                 null,
                 null,
                 null,
@@ -248,6 +254,7 @@ class AdobeVisitorModuleTests {
                 mockSharedPreferences,
                 5,
                 "my_ecid",
+                null,
                 null,
                 null,
                 null
@@ -279,6 +286,7 @@ class AdobeVisitorModuleTests {
                 mockAdobeService,
                 mockSharedPreferences,
                 5,
+                null,
                 null,
                 null,
                 null,
@@ -315,6 +323,7 @@ class AdobeVisitorModuleTests {
                 null,
                 null,
                 null,
+                null,
                 null
             )
 
@@ -338,6 +347,7 @@ class AdobeVisitorModuleTests {
                 mockAdobeService,
                 mockSharedPreferences,
                 0,
+                null,
                 null,
                 null,
                 null,
@@ -390,6 +400,7 @@ class AdobeVisitorModuleTests {
                 null,
                 null,
                 null,
+                null,
                 null
             )
 
@@ -437,6 +448,7 @@ class AdobeVisitorModuleTests {
                 null,
                 null,
                 null,
+                null,
                 null
             )
 
@@ -462,14 +474,15 @@ class AdobeVisitorModuleTests {
             null,
             null,
             null,
+            null,
             null
         )
 
-        val encodedParams = adobeVisitorModule.provideParameters()
-
-        if (encodedParams != null) {
-            encodedParams["adobe_mc"]?.let {
-                assertTrue(it[0].contains("MCID=ecid|MCORGID=orgId|TS="))
+        adobeVisitorModule.provideParameters { map ->
+            if (map != null) {
+                map["adobe_mc"]?.let {
+                    assertTrue(it[0].contains("MCID=ecid|MCORGID=orgId|TS="))
+                }
             }
         }
     }
@@ -486,12 +499,18 @@ class AdobeVisitorModuleTests {
             null,
             null,
             null,
+            null,
             null
         )
 
-        val url = adobeVisitorModule.decorateUrl(URL("https://tealium.com/"))
-
-        assertTrue(url.toString().contains(QP_ADOBE_MC, ignoreCase = true))
-        assertTrue(url.toString().contains("/?adobe_mc=MCID%3Decid%7CMCORGID%3DorgId%7CTS%3D", ignoreCase = true))
+        adobeVisitorModule.decorateUrl(URL("https://tealium.com/"), object : UrlDecoratorHandler {
+            override fun onDecorateUrl(url: URL) {
+                assertTrue(url.toString().contains(QP_ADOBE_MC, ignoreCase = true))
+                assertTrue(
+                    url.toString()
+                        .contains("/?adobe_mc=MCID%3Decid%7CMCORGID%3DorgId%7CTS%3D", ignoreCase = true)
+                )
+            }
+        })
     }
 }
