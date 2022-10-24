@@ -1,10 +1,12 @@
 package com.tealium.adobe.kotlin
 
 import android.content.SharedPreferences
+import android.net.Uri
 import com.tealium.adobe.api.*
 import com.tealium.core.Logger
 import com.tealium.core.TealiumConfig
 import com.tealium.core.TealiumContext
+import com.tealium.core.messaging.MessengerService
 import io.mockk.*
 import io.mockk.impl.annotations.MockK
 import io.mockk.impl.annotations.RelaxedMockK
@@ -13,6 +15,7 @@ import kotlinx.coroutines.runBlocking
 import org.junit.Assert.*
 import org.junit.Before
 import org.junit.Test
+import java.net.URL
 import java.util.*
 
 class AdobeVisitorModuleTests {
@@ -37,6 +40,9 @@ class AdobeVisitorModuleTests {
 
     @RelaxedMockK
     lateinit var mockAdobeListener: ResponseListener<AdobeVisitor>
+
+    @RelaxedMockK
+    lateinit var mockMessengerService: MessengerService
 
     @Before
     fun setUp() {
@@ -63,6 +69,8 @@ class AdobeVisitorModuleTests {
         every { mockVisitor.region } returns 1
         every { mockVisitor.blob } returns "blob"
         every { mockVisitor.nextRefresh } returns Date(Long.MAX_VALUE)
+
+        every { mockTealiumContext.events } returns mockMessengerService
 
         mockkObject(Logger)
         every {
@@ -373,7 +381,8 @@ class AdobeVisitorModuleTests {
             "knownId",
             "1",
             AdobeAuthState.AUTH_STATE_UNKNOWN,
-            mockAdobeListener)
+            mockAdobeListener
+        )
 
         assertSame(newVisitor, adobeVisitorModule.visitor)
         verify {
@@ -382,7 +391,8 @@ class AdobeVisitorModuleTests {
                 "ecid",
                 "1",
                 AdobeAuthState.AUTH_STATE_UNKNOWN,
-                capturedListener.captured)
+                capturedListener.captured
+            )
             mockAdobeListener.success(newVisitor)
         }
     }
@@ -413,7 +423,8 @@ class AdobeVisitorModuleTests {
             "knownId",
             "1",
             AdobeAuthState.AUTH_STATE_UNKNOWN,
-        mockAdobeListener)
+            mockAdobeListener
+        )
 
         assertSame(mockVisitor, adobeVisitorModule.visitor)
         verify {
@@ -422,7 +433,8 @@ class AdobeVisitorModuleTests {
                 "ecid",
                 "1",
                 AdobeAuthState.AUTH_STATE_UNKNOWN,
-                capturedListener.captured)
+                capturedListener.captured
+            )
             mockAdobeListener.failure(ErrorCode.ERROR_FAILED_REQUEST, null)
         }
     }
@@ -444,5 +456,47 @@ class AdobeVisitorModuleTests {
             mockEditor.clear()
             mockEditor.apply()
         }
+    }
+
+    @Test
+    fun appendVisitorQueryParams(): Unit = runBlocking {
+        every { AdobeVisitor.fromSharedPreferences(mockSharedPreferences) } returns mockVisitor
+
+        val adobeVisitorModule = AdobeVisitorModule(
+            mockTealiumContext,
+            mockAdobeService,
+            mockSharedPreferences
+        )
+
+        val encodedParams = adobeVisitorModule.provideParameters()
+
+        assertTrue(encodedParams.containsKey(QP_ADOBE_MC))
+        encodedParams[QP_ADOBE_MC]?.let {
+            assertTrue(
+                it[0].contains("MCID=ecid|MCORGID=orgId|TS=")
+            )
+        }
+    }
+
+    @Test
+    fun generateUrlWithVisitorQueryParams(): Unit = runBlocking {
+        every { AdobeVisitor.fromSharedPreferences(mockSharedPreferences) } returns mockVisitor
+        val mockUriBuilder = mockk<Uri.Builder>()
+        mockkStatic(Uri::class)
+        every { Uri.parse(any()).buildUpon() } returns mockUriBuilder
+        every { mockUriBuilder.appendQueryParameter(any(), any()) } returns mockUriBuilder
+        every { mockUriBuilder.build() } returns mockk()
+        every { mockUriBuilder.build().toString() } returns "https://tealium.com/?adobe_mc=MCID%3Decid%7CMCORGID%3DorgId%7CTS%3D"
+
+        val adobeVisitorModule = AdobeVisitorModule(
+            mockTealiumContext,
+            mockAdobeService,
+            mockSharedPreferences
+        )
+
+        val url = adobeVisitorModule.decorateUrl(URL("https://tealium.com/"))
+
+        assertTrue(url.toString().contains(QP_ADOBE_MC, ignoreCase = true))
+        assertTrue(url.toString().contains("/?adobe_mc=MCID%3Decid%7CMCORGID%3DorgId%7CTS%3D", ignoreCase = true))
     }
 }

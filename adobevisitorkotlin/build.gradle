@@ -5,15 +5,15 @@ plugins {
 }
 
 group = 'com.tealium'
-version = '1.0.0'
+version = '1.1.0'
 
 android {
-    compileSdkVersion 29
-    buildToolsVersion "29.0.3"
+    compileSdkVersion 31
+    buildToolsVersion "30.0.3"
 
     defaultConfig {
         minSdkVersion 21
-        targetSdkVersion 29
+        targetSdkVersion 31
         versionCode 1
         versionName "1.0"
 
@@ -44,7 +44,7 @@ android {
 dependencies {
 
     api project(":adobevisitorapi")
-    implementation 'com.tealium:kotlin-core:1.0.0'
+    implementation 'com.tealium:kotlin-core:1.5.0'
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$kotlin_coroutines_version"
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$kotlin_coroutines_android_version"
@@ -74,6 +74,7 @@ afterEvaluate {
 //                credentials(AwsCredentials) {
 //                    accessKey AWS_ACCESS_KEY
 //                    secretKey AWS_SECRET_KEY
+//                    sessionToken AWS_SESSION_TOKEN
 //                }
 //            }
         }

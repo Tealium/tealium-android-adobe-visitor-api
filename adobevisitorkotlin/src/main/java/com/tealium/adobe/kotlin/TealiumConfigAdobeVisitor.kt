@@ -2,6 +2,7 @@ package com.tealium.adobe.kotlin
 
 import com.tealium.adobe.api.AdobeAuthState
 import com.tealium.core.*
+import java.util.concurrent.Executor
 
 val Collectors.AdobeVisitor: CollectorFactory
     get() = AdobeVisitorModule
@@ -15,6 +16,7 @@ const val ADOBE_VISITOR_RETRIES = "adobe_visitor_retries"
 const val ADOBE_VISITOR_AUTH_STATE = "adobe_visitor_auth_state"
 const val ADOBE_VISITOR_DATA_PROVIDER_ID = "adobe_visitor_data_provider_id"
 const val ADOBE_VISITOR_CUSTOM_VISITOR_ID = "adobe_visitor_custom_visitor_id"
+const val ADOBE_VISITOR_EXECUTOR = "adobe_visitor_executor"
 
 /**
  *  Sets the Adobe OrgId for fetching/updating visitor Ids.
@@ -85,4 +87,15 @@ var TealiumConfig.adobeVisitorCustomVisitorId: String?
         value?.let {
             options[ADOBE_VISITOR_CUSTOM_VISITOR_ID] = it
         } ?: options.remove(ADOBE_VISITOR_CUSTOM_VISITOR_ID)
+    }
+
+/**
+ * Sets background thread for processing
+ */
+var TealiumConfig.adobeVisitorExecutor: Executor?
+    get() = options[ADOBE_VISITOR_EXECUTOR] as? Executor
+    set(value) {
+        value?.let {
+            options[ADOBE_VISITOR_EXECUTOR] = it
+        } ?: options.remove(ADOBE_VISITOR_EXECUTOR)
     }

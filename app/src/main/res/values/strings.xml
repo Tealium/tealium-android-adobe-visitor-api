@@ -6,6 +6,8 @@
     <string name="track_event">Track Event</string>
     <string name="refresh">Refresh Visitor</string>
     <string name="edit_known_id">Known Id (e.g. email)</string>
+    <string name="decorate_url">URL to decorate</string>
+    <string name="decorate_url_button">Decorate URL</string>
     <string-array name="api_options">
         <item>Java</item>
         <item>Kotlin</item>

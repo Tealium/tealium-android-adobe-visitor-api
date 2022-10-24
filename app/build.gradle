@@ -4,13 +4,13 @@ plugins {
 }
 
 android {
-    compileSdkVersion 29
-    buildToolsVersion "29.0.3"
+    compileSdkVersion 31
+    buildToolsVersion "30.0.2"
 
     defaultConfig {
         applicationId "com.tealium.adobe"
         minSdkVersion 21
-        targetSdkVersion 29
+        targetSdkVersion 31
         versionCode 1
         versionName "1.0"
 
@@ -46,12 +46,13 @@ dependencies {
     implementation 'androidx.appcompat:appcompat:1.2.0'
     implementation 'com.google.android.material:material:1.1.0'
     implementation 'androidx.constraintlayout:constraintlayout:2.0.4'
+    implementation 'androidx.lifecycle:lifecycle-runtime-ktx:2.4.0'
 
-    implementation 'com.tealium:library:5.9.0'
+    implementation 'com.tealium:library:5.9.4'
     implementation project(':adobevisitorjava')
 
-    implementation 'com.tealium:kotlin-core:1.2.4'
-    implementation 'com.tealium:kotlin-collect-dispatcher:1.0.4'
+    implementation 'com.tealium:kotlin-core:1.4.4'
+    implementation 'com.tealium:kotlin-collect-dispatcher:1.1.0'
     implementation project(':adobevisitorkotlin')
 
     testImplementation 'junit:junit:4.+'

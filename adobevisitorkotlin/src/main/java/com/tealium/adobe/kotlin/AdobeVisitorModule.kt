@@ -3,23 +3,28 @@
 package com.tealium.adobe.kotlin
 
 import android.content.SharedPreferences
+import android.net.Uri
 import com.tealium.adobe.api.*
 import com.tealium.adobe.api.network.HttpClient
 import com.tealium.core.*
 import kotlinx.coroutines.*
 import kotlinx.coroutines.Dispatchers
+import java.net.URL
 import java.util.*
+import java.util.concurrent.Executor
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 
 class AdobeVisitorModule(
     private val context: TealiumContext,
+    private val executor: Executor = context.config.adobeVisitorExecutor ?: Dispatchers.IO.asExecutor(),
     private val visitorApi: AdobeExperienceCloudIdService = AdobeVisitorAPI(
         context.config.application,
         context.config.adobeVisitorOrgId ?: "",
+        executor,
         HttpClient(
             context.config.application.applicationContext,
-            Dispatchers.IO.asExecutor()
+            executor
         )
     ),
     private val sharedPreferences: SharedPreferences = context.config.application.getSharedPreferences(
@@ -32,13 +37,14 @@ class AdobeVisitorModule(
     dataProviderId: String? = context.config.adobeVisitorDataProviderId,
     @AdobeAuthState authState: Int? = context.config.adobeVisitorAuthState,
     customVisitorId: String? = context.config.adobeVisitorCustomVisitorId
-) : Collector {
+) : Collector, QueryParameterProvider {
 
     override var enabled: Boolean = true
     override val name: String = MODULE_NAME
 
     private val maxRetries: Int = maxRetries.coerceAtLeast(0)
     private var autoFetchVisitorDeferred: Deferred<AdobeVisitor?>? = null
+    private val backgroundScope = CoroutineScope(Dispatchers.IO)
 
     private var _visitor: AdobeVisitor? = AdobeVisitor.fromSharedPreferences(sharedPreferences)
         set(value) {
@@ -65,7 +71,8 @@ class AdobeVisitorModule(
         val ecid = _visitor?.experienceCloudId
         if (ecid != null) {
             if (dataProviderId != null &&
-                customVisitorId != null) {
+                customVisitorId != null
+            ) {
                 visitorApi.linkEcidToKnownIdentifier(
                     customVisitorId,
                     ecid,
@@ -124,6 +131,25 @@ class AdobeVisitorModule(
         }
     }
 
+    fun decorateUrl(url: URL, handler: UrlDecoratorHandler) {
+        backgroundScope.launch {
+            val params = provideParameters()
+
+            val uriBuilder = Uri.parse(url.toURI().toString()).buildUpon()
+
+            if (params.isEmpty()) {
+                handler.onDecorateUrl(url)
+            }
+
+            params.forEach { entry ->
+                entry.value.forEach { value ->
+                    uriBuilder.appendQueryParameter(entry.key, value)
+                }
+            }
+            handler.onDecorateUrl(URL(uriBuilder.build().toString()))
+        }
+    }
+
     private fun refreshExistingAdobeEcid(
         experienceCloudId: String,
         adobeResponseListener: ResponseListener<AdobeVisitor>?
@@ -134,6 +160,26 @@ class AdobeVisitorModule(
             experienceCloudId,
             AdobeVisitorListener(adobeResponseListener)
         )
+    }
+
+    override suspend fun provideParameters(): Map<String, List<String>> {
+        if (visitor == null && maxRetries > 0) {
+            val deferred = fetchInitialVisitorId()
+            if (!deferred.isCompleted) {
+                Logger.dev(BuildConfig.TAG, "Awaiting ecid")
+                deferred.await()
+            }
+        }
+
+        return visitor?.let { v ->
+            mapOf(
+                QP_ADOBE_MC to listOf(
+                    "$QP_MCID=${v.experienceCloudId}$QP_SEPARATOR" +
+                            "$QP_MCORGID=$adobeOrgId$QP_SEPARATOR" +
+                            "$QP_TS=${System.currentTimeMillis() / 1000}"
+                )
+            )
+        } ?: emptyMap()
     }
 
     override suspend fun collect(): Map<String, Any> {
@@ -150,14 +196,23 @@ class AdobeVisitorModule(
         } ?: emptyMap()
     }
 
-    private suspend fun fetchInitialVisitorId(customVisitorId: String? = null, dataProviderId: String? = null, authState: Int? = null): Deferred<AdobeVisitor?> =
+    private suspend fun fetchInitialVisitorId(
+        customVisitorId: String? = null,
+        dataProviderId: String? = null,
+        authState: Int? = null
+    ): Deferred<AdobeVisitor?> =
         autoFetchVisitorDeferred
             ?: coroutineScope {
                 async {
                     for (i in 1..maxRetries) {
                         Logger.dev(BuildConfig.TAG, "Attempt $i")
                         try {
-                            visitorApi.suspendRequestNewAdobeVisitor(1000, customVisitorId, dataProviderId, authState)?.let {
+                            visitorApi.suspendRequestNewAdobeVisitor(
+                                1000,
+                                customVisitorId,
+                                dataProviderId,
+                                authState
+                            )?.let {
                                 // Return early if valid visitor.
                                 _visitor = it
                                 return@async it
@@ -202,7 +257,12 @@ class AdobeVisitorModule(
         }
     }
 
-    private suspend fun AdobeExperienceCloudIdService.suspendRequestNewAdobeVisitor(timeout: Long, customVisitorId: String? = null, dataProviderId: String? = null, authState: Int? = null): AdobeVisitor? =
+    private suspend fun AdobeExperienceCloudIdService.suspendRequestNewAdobeVisitor(
+        timeout: Long,
+        customVisitorId: String? = null,
+        dataProviderId: String? = null,
+        authState: Int? = null
+    ): AdobeVisitor? =
         suspendCancellableCoroutine { cont ->
             val listener = AdobeVisitorListener(object : ResponseListener<AdobeVisitor> {
                 override fun success(data: AdobeVisitor) {
@@ -222,8 +282,14 @@ class AdobeVisitorModule(
 
             // use given custom id and data provider if available
             if (customVisitorId != null &&
-                    dataProviderId != null) {
-                visitorApi.requestNewEcidAndLink(customVisitorId, dataProviderId, authState, listener)
+                dataProviderId != null
+            ) {
+                visitorApi.requestNewEcidAndLink(
+                    customVisitorId,
+                    dataProviderId,
+                    authState,
+                    listener
+                )
             } else {
                 visitorApi.requestNewAdobeEcid(listener)
             }

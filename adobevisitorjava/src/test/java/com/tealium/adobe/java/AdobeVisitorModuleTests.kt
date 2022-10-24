@@ -13,6 +13,7 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
+import java.net.URL
 import java.util.*
 
 @RunWith(RobolectricTestRunner::class)
@@ -84,6 +85,7 @@ class AdobeVisitorModuleTests {
                 null,
                 null,
                 null,
+                null,
                 null
             )
 
@@ -103,6 +105,7 @@ class AdobeVisitorModuleTests {
                 null,
                 null,
                 null,
+                null,
                 null
             )
 
@@ -117,6 +120,7 @@ class AdobeVisitorModuleTests {
                 mockAdobeService,
                 mockSharedPreferences,
                 0,
+                null,
                 null,
                 null,
                 null,
@@ -139,6 +143,7 @@ class AdobeVisitorModuleTests {
                 "my_ecid",
                 null,
                 null,
+                null,
                 null
             )
 
@@ -159,7 +164,8 @@ class AdobeVisitorModuleTests {
                 null,
                 "dp",
                 null,
-                "custom"
+                "custom",
+                null
             )
 
         assertNull(adobeVisitorModule.visitor)
@@ -180,7 +186,8 @@ class AdobeVisitorModuleTests {
                 null,
                 "dp",
                 null,
-                "custom"
+                "custom",
+                null
             )
 
         assertNotNull(adobeVisitorModule.visitor)
@@ -198,6 +205,7 @@ class AdobeVisitorModuleTests {
             mockAdobeService,
             mockSharedPreferences,
             0,
+            null,
             null,
             null,
             null,
@@ -219,6 +227,7 @@ class AdobeVisitorModuleTests {
                 mockAdobeService,
                 mockSharedPreferences,
                 0,
+                null,
                 null,
                 null,
                 null,
@@ -245,6 +254,7 @@ class AdobeVisitorModuleTests {
                 mockSharedPreferences,
                 5,
                 "my_ecid",
+                null,
                 null,
                 null,
                 null
@@ -276,6 +286,7 @@ class AdobeVisitorModuleTests {
                 mockAdobeService,
                 mockSharedPreferences,
                 5,
+                null,
                 null,
                 null,
                 null,
@@ -312,6 +323,7 @@ class AdobeVisitorModuleTests {
                 null,
                 null,
                 null,
+                null,
                 null
             )
 
@@ -335,6 +347,7 @@ class AdobeVisitorModuleTests {
                 mockAdobeService,
                 mockSharedPreferences,
                 0,
+                null,
                 null,
                 null,
                 null,
@@ -387,6 +400,7 @@ class AdobeVisitorModuleTests {
                 null,
                 null,
                 null,
+                null,
                 null
             )
 
@@ -434,6 +448,7 @@ class AdobeVisitorModuleTests {
                 null,
                 null,
                 null,
+                null,
                 null
             )
 
@@ -445,5 +460,57 @@ class AdobeVisitorModuleTests {
             mockEditor.clear()
             mockEditor.apply()
         }
+    }
+
+    @Test
+    fun appendVisitorQueryParams() {
+        every { AdobeVisitor.fromSharedPreferences(mockSharedPreferences) } returns mockVisitor
+
+        val adobeVisitorModule = AdobeVisitorModule(
+            adobeOrgId,
+            mockAdobeService,
+            mockSharedPreferences,
+            0,
+            null,
+            null,
+            null,
+            null,
+            null
+        )
+
+        adobeVisitorModule.provideParameters { map ->
+            if (map != null) {
+                map["adobe_mc"]?.let {
+                    assertTrue(it[0].contains("MCID=ecid|MCORGID=orgId|TS="))
+                }
+            }
+        }
+    }
+
+    @Test
+    fun generateUrlWithVisitorQueryParams() {
+        every { AdobeVisitor.fromSharedPreferences(mockSharedPreferences) } returns mockVisitor
+
+        val adobeVisitorModule = AdobeVisitorModule(
+            adobeOrgId,
+            mockAdobeService,
+            mockSharedPreferences,
+            0,
+            null,
+            null,
+            null,
+            null,
+            null
+        )
+
+        adobeVisitorModule.decorateUrl(URL("https://tealium.com/"), object : UrlDecoratorHandler {
+            override fun onDecorateUrl(url: URL) {
+                assertTrue(url.toString().contains(QP_ADOBE_MC, ignoreCase = true))
+                assertTrue(
+                    url.toString()
+                        .contains("/?adobe_mc=MCID%3Decid%7CMCORGID%3DorgId%7CTS%3D", ignoreCase = true)
+                )
+            }
+        })
     }
 }

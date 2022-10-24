@@ -24,4 +24,17 @@
         android:layout_margin="8dp"
         android:text="@string/link_existing_ecid" />
 
+    <EditText
+        android:id="@+id/decorate_url"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="@string/decorate_url"/>
+
+    <Button
+        android:id="@+id/button_decorate_url"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="8dp"
+        android:text="@string/decorate_url_button" />
+
 </LinearLayout>

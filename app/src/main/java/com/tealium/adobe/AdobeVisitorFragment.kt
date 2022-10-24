@@ -13,11 +13,15 @@ import android.widget.EditText
 import android.widget.TextView
 import android.widget.Toast
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
 import com.tealium.adobe.api.AdobeAuthState
 import com.tealium.adobe.api.AdobeVisitor
 import com.tealium.adobe.api.ResponseListener
+import com.tealium.adobe.api.UrlDecoratorHandler
 import com.tealium.adobe.wrappers.TealiumWrapper
+import kotlinx.coroutines.launch
 import org.json.JSONObject
+import java.net.URL
 
 class AdobeVisitorFragment(
     private val wrapper: TealiumWrapper,
@@ -28,6 +32,10 @@ class AdobeVisitorFragment(
     private lateinit var linkExistingVisitorIdButton: Button
 
     private lateinit var visitorInfoTextView: TextView
+
+    private lateinit var decorateUrlEditText: EditText
+    private lateinit var decorateUrlButton: Button
+    private var currentUrl: String = "https://www.example.com"
 
     private val mainHandler = Handler(Looper.getMainLooper())
 
@@ -80,6 +88,19 @@ class AdobeVisitorFragment(
             linkExisting(text)
         }
 
+        decorateUrlEditText = view.findViewById(R.id.decorate_url)
+        decorateUrlButton = view.findViewById(R.id.button_decorate_url)
+        decorateUrlButton.setOnClickListener {
+            val text: String = decorateUrlEditText.text.toString()
+            decorateUrl(text, object : UrlDecoratorHandler {
+                override fun onDecorateUrl(url: URL) {
+                    viewLifecycleOwner.lifecycleScope.launch {
+                        decorateUrlEditText.setText(url.toString())
+                    }
+                }
+            })
+        }
+
         updateVisitor(visitor)
     }
 
@@ -101,6 +122,10 @@ class AdobeVisitorFragment(
                 responseListener
             )
         }
+    }
+
+    private fun decorateUrl(url: String, handler: UrlDecoratorHandler) {
+        wrapper.decorateUrl(url, handler)
     }
 }
 
