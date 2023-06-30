@@ -13,6 +13,7 @@ import com.tealium.adobe.api.AdobeExperienceCloudIdService;
 import com.tealium.adobe.api.AdobeVisitor;
 import com.tealium.adobe.api.AdobeVisitorAPI;
 import com.tealium.adobe.api.Constants;
+import com.tealium.adobe.api.GetUrlParamsHandler;
 import com.tealium.adobe.api.ResponseListener;
 import com.tealium.adobe.api.UrlDecoratorHandler;
 import com.tealium.internal.QueryParameterProvider;
@@ -208,6 +209,21 @@ public final class AdobeVisitorModule implements PopulateDispatchListener, Query
                 Log.d(BuildConfig.TAG, "Error decorating URL: " + e.getMessage());
                 handler.onDecorateUrl(url);
             }
+        });
+    }
+
+    public void getUrlParams(GetUrlParamsHandler handler) {
+        provideParameters(map -> {
+            // Only retrieves the 1st query param,
+            // since Adobe Visitor API puts everything in a single param
+                for (Map.Entry<String, String[]> entry : map.entrySet()) {
+                    for (String item : entry.getValue()) {
+                        Map<String, String> adobeParams = new HashMap<>();
+                        adobeParams.put(entry.getKey(), item);
+                        handler.onRetrieveParams(adobeParams);
+                        break;
+                    }
+                }
         });
     }
 

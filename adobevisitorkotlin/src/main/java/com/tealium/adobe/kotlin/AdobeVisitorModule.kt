@@ -150,6 +150,14 @@ class AdobeVisitorModule(
         }
     }
 
+    fun getUrlParams(handler: GetUrlParamsHandler) {
+        backgroundScope.launch {
+            val params = provideParameters()
+            val adobeParam = params.entries.iterator().next()
+            handler.onRetrieveParams(mapOf(adobeParam.key to adobeParam.value.first()))
+        }
+    }
+
     private fun refreshExistingAdobeEcid(
         experienceCloudId: String,
         adobeResponseListener: ResponseListener<AdobeVisitor>?

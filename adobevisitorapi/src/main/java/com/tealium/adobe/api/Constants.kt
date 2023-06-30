@@ -16,7 +16,7 @@ const val QP_VERSION = "d_ver"
 const val QP_ID_SYNC_TTL = "id_sync_ttl"
 
 const val QP_ADOBE_MC = "adobe_mc"
-const val QP_MCID = "MCID"
+const val QP_MCID = "MCMID"
 const val QP_MCORGID = "MCORGID"
 const val QP_TS = "TS"
 const val QP_SEPARATOR = "|"
