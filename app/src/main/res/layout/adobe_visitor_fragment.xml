@@ -37,4 +37,17 @@
         android:layout_margin="8dp"
         android:text="@string/decorate_url_button" />
 
+    <EditText
+        android:id="@+id/get_url_params"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="@string/get_url_params"/>
+
+    <Button
+        android:id="@+id/button_get_url_params"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="8dp"
+        android:text="@string/get_url_params_button" />
+
 </LinearLayout>

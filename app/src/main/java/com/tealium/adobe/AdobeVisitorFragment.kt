@@ -22,6 +22,7 @@ import com.tealium.adobe.api.UrlDecoratorHandler
 import com.tealium.adobe.wrappers.TealiumWrapper
 import kotlinx.coroutines.launch
 import org.json.JSONObject
+import java.net.URL
 
 class AdobeVisitorFragment(
     private val wrapper: TealiumWrapper,
@@ -35,7 +36,8 @@ class AdobeVisitorFragment(
 
     private lateinit var decorateUrlEditText: EditText
     private lateinit var decorateUrlButton: Button
-    private var currentUrl: String = "https://www.example.com"
+    private lateinit var getUrlParamsEditText: EditText
+    private lateinit var getUrlParamsButton: Button
 
     private val mainHandler = Handler(Looper.getMainLooper())
 
@@ -92,22 +94,33 @@ class AdobeVisitorFragment(
         decorateUrlButton = view.findViewById(R.id.button_decorate_url)
         decorateUrlButton.setOnClickListener {
             val text: String = decorateUrlEditText.text.toString()
-//            decorateUrl(text, object : UrlDecoratorHandler {
-//                override fun onDecorateUrl(url: URL) {
-//                    viewLifecycleOwner.lifecycleScope.launch {
-//                        decorateUrlEditText.setText(url.toString())
-//                    }
-//                }
-//            })
+            try {
+                URL(text)
+            } catch (e: java.lang.Exception){
+                return@setOnClickListener
+            }
+            decorateUrl(text, object : UrlDecoratorHandler {
+                override fun onDecorateUrl(url: URL) {
+                    viewLifecycleOwner.lifecycleScope.launch {
+                        decorateUrlEditText.setText(url.toString())
+                    }
+                }
+            })
+        }
+
+        getUrlParamsEditText = view.findViewById(R.id.get_url_params)
+        getUrlParamsButton = view.findViewById(R.id.button_get_url_params)
+
+        getUrlParamsButton.setOnClickListener {
+            val text: String = getUrlParamsEditText.text.toString()
             wrapper.getUrlParams(object : GetUrlParamsHandler {
                 override fun onRetrieveParams(params: Map<String, String>?) {
                     viewLifecycleOwner.lifecycleScope.launch {
                         params?.let {
                             val params = it.entries.iterator().next()
                             val queryItem = params.key + "=" + params.value
-                            decorateUrlEditText.setText(queryItem)
+                            getUrlParamsEditText.setText(queryItem)
                         }
-
                     }
                 }
             })
