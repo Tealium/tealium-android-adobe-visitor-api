@@ -113,7 +113,7 @@ class AdobeVisitorFragment(
 
         getURLParametersButton.setOnClickListener {
             val text: String = getURLParametersEditText.text.toString()
-            wrapper.getURLParameters(object : GetUrlParametersHandler {
+            wrapper.getUrlParameters(object : GetUrlParametersHandler {
                 override fun onRetrieveParameters(params: Map<String, String>?) {
                     viewLifecycleOwner.lifecycleScope.launch {
                         params?.let {

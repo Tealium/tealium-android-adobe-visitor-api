@@ -13,5 +13,5 @@ interface TealiumWrapper {
 
     fun decorateUrl(url: String, handler: UrlDecoratorHandler)
 
-    fun getURLParameters(handler: GetUrlParametersHandler)
+    fun getUrlParameters(handler: GetUrlParametersHandler)
 }

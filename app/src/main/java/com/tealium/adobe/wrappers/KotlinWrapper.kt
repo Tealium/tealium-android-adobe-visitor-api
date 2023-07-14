@@ -65,7 +65,7 @@ class KotlinWrapper(app: Application) : TealiumWrapper {
         tealium.adobeVisitorApi?.decorateUrl(URL(url), handler)
     }
 
-    override fun getURLParameters(handler: GetUrlParametersHandler) {
+    override fun getUrlParameters(handler: GetUrlParametersHandler) {
         tealium.adobeVisitorApi?.getUrlParameters(handler)
     }
 }

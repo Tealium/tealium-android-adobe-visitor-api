@@ -46,7 +46,7 @@ class JavaWrapper(app: Application) : TealiumWrapper {
         adobeVisitorModule.linkEcidToKnownIdentifier(knownId, dataProviderId, authState, responseListener)
     }
 
-    override fun getURLParameters(handler: GetUrlParametersHandler) {
+    override fun getUrlParameters(handler: GetUrlParametersHandler) {
         adobeVisitorModule.getUrlParameters(handler)
     }
 
