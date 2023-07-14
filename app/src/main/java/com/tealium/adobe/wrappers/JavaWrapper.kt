@@ -47,7 +47,7 @@ class JavaWrapper(app: Application) : TealiumWrapper {
     }
 
     override fun getURLParameters(handler: GetUrlParametersHandler) {
-        adobeVisitorModule.getURLParameters(handler)
+        adobeVisitorModule.getUrlParameters(handler)
     }
 
     override fun clearVisitor() {

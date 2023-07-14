@@ -15,7 +15,7 @@ android {
         minSdkVersion 21
         targetSdkVersion 33
 
-        buildConfigField 'String', 'TAG', "\"Tealium-AdobeVisitor-$version\""
+        buildConfigField 'String', 'TAG', "\"Tealium-Adobe-$version\""
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles "consumer-rules.pro"
