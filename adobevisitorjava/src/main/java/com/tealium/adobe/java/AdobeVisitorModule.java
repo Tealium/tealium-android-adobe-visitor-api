@@ -220,7 +220,7 @@ public final class AdobeVisitorModule implements PopulateDispatchListener, Query
                     for (String item : entry.getValue()) {
                         Map<String, String> adobeParams = new HashMap<>();
                         adobeParams.put(entry.getKey(), item);
-                        handler.onRetrieveParams(adobeParams);
+                        handler.onRetrieveParameters(adobeParams);
                         break;
                     }
                 }

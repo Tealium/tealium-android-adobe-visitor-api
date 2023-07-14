@@ -154,7 +154,7 @@ class AdobeVisitorModule(
         backgroundScope.launch {
             val params = provideParameters()
             val adobeParam = params.entries.iterator().next()
-            handler.onRetrieveParams(mapOf(adobeParam.key to adobeParam.value.first()))
+            handler.onRetrieveParameters(mapOf(adobeParam.key to adobeParam.value.first()))
         }
     }
 
