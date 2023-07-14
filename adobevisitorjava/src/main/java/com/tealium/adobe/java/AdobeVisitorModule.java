@@ -13,7 +13,7 @@ import com.tealium.adobe.api.AdobeExperienceCloudIdService;
 import com.tealium.adobe.api.AdobeVisitor;
 import com.tealium.adobe.api.AdobeVisitorAPI;
 import com.tealium.adobe.api.Constants;
-import com.tealium.adobe.api.GetUrlParamsHandler;
+import com.tealium.adobe.api.GetURLParametersHandler;
 import com.tealium.adobe.api.ResponseListener;
 import com.tealium.adobe.api.UrlDecoratorHandler;
 import com.tealium.internal.QueryParameterProvider;
@@ -212,7 +212,7 @@ public final class AdobeVisitorModule implements PopulateDispatchListener, Query
         });
     }
 
-    public void getUrlParams(GetUrlParamsHandler handler) {
+    public void getURLParameters(GetURLParametersHandler handler) {
         provideParameters(map -> {
             // Only retrieves the 1st query param,
             // since Adobe Visitor API puts everything in a single param

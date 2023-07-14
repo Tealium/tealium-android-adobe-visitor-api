@@ -3,7 +3,7 @@ package com.tealium.adobe.wrappers
 import android.app.Application
 import com.tealium.adobe.BuildConfig
 import com.tealium.adobe.api.AdobeVisitor
-import com.tealium.adobe.api.GetUrlParamsHandler
+import com.tealium.adobe.api.GetURLParametersHandler
 import com.tealium.adobe.api.ResponseListener
 import com.tealium.adobe.api.UrlDecoratorHandler
 import com.tealium.adobe.java.AdobeVisitorModule
@@ -46,8 +46,8 @@ class JavaWrapper(app: Application) : TealiumWrapper {
         adobeVisitorModule.linkEcidToKnownIdentifier(knownId, dataProviderId, authState, responseListener)
     }
 
-    override fun getUrlParams(handler: GetUrlParamsHandler) {
-        adobeVisitorModule.getUrlParams(handler)
+    override fun getURLParameters(handler: GetURLParametersHandler) {
+        adobeVisitorModule.getURLParameters(handler)
     }
 
     override fun clearVisitor() {

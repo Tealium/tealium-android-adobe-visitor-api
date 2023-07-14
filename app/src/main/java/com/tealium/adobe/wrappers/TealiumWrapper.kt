@@ -1,7 +1,7 @@
 package com.tealium.adobe.wrappers
 
 import com.tealium.adobe.api.AdobeVisitor
-import com.tealium.adobe.api.GetUrlParamsHandler
+import com.tealium.adobe.api.GetURLParametersHandler
 import com.tealium.adobe.api.ResponseListener
 import com.tealium.adobe.api.UrlDecoratorHandler
 
@@ -13,5 +13,5 @@ interface TealiumWrapper {
 
     fun decorateUrl(url: String, handler: UrlDecoratorHandler)
 
-    fun getUrlParams(handler: GetUrlParamsHandler)
+    fun getURLParameters(handler: GetURLParametersHandler)
 }

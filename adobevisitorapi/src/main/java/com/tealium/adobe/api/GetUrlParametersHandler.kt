@@ -1,6 +1,6 @@
 package com.tealium.adobe.api
 
 
-interface GetUrlParamsHandler {
+interface GetURLParametersHandler {
     fun onRetrieveParams(params: Map<String, String>?)
 }

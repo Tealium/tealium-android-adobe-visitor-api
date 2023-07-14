@@ -16,7 +16,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import com.tealium.adobe.api.AdobeAuthState
 import com.tealium.adobe.api.AdobeVisitor
-import com.tealium.adobe.api.GetUrlParamsHandler
+import com.tealium.adobe.api.GetURLParametersHandler
 import com.tealium.adobe.api.ResponseListener
 import com.tealium.adobe.api.UrlDecoratorHandler
 import com.tealium.adobe.wrappers.TealiumWrapper
@@ -36,8 +36,8 @@ class AdobeVisitorFragment(
 
     private lateinit var decorateUrlEditText: EditText
     private lateinit var decorateUrlButton: Button
-    private lateinit var getUrlParamsEditText: EditText
-    private lateinit var getUrlParamsButton: Button
+    private lateinit var getURLParametersEditText: EditText
+    private lateinit var getURLParametersButton: Button
 
     private val mainHandler = Handler(Looper.getMainLooper())
 
@@ -108,18 +108,18 @@ class AdobeVisitorFragment(
             })
         }
 
-        getUrlParamsEditText = view.findViewById(R.id.get_url_params)
-        getUrlParamsButton = view.findViewById(R.id.button_get_url_params)
+        getURLParametersEditText = view.findViewById(R.id.get_url_params)
+        getURLParametersButton = view.findViewById(R.id.button_get_url_params)
 
-        getUrlParamsButton.setOnClickListener {
-            val text: String = getUrlParamsEditText.text.toString()
-            wrapper.getUrlParams(object : GetUrlParamsHandler {
+        getURLParametersButton.setOnClickListener {
+            val text: String = getURLParametersEditText.text.toString()
+            wrapper.getURLParameters(object : GetURLParametersHandler {
                 override fun onRetrieveParams(params: Map<String, String>?) {
                     viewLifecycleOwner.lifecycleScope.launch {
                         params?.let {
                             val params = it.entries.iterator().next()
                             val queryItem = params.key + "=" + params.value
-                            getUrlParamsEditText.setText(queryItem)
+                            getURLParametersEditText.setText(queryItem)
                         }
                     }
                 }
