@@ -36,8 +36,8 @@ class AdobeVisitorFragment(
 
     private lateinit var decorateUrlEditText: EditText
     private lateinit var decorateUrlButton: Button
-    private lateinit var getURLParametersEditText: EditText
-    private lateinit var getURLParametersButton: Button
+    private lateinit var getUrlParametersEditText: EditText
+    private lateinit var getUrlParametersButton: Button
 
     private val mainHandler = Handler(Looper.getMainLooper())
 
@@ -108,18 +108,18 @@ class AdobeVisitorFragment(
             })
         }
 
-        getURLParametersEditText = view.findViewById(R.id.get_url_params)
-        getURLParametersButton = view.findViewById(R.id.button_get_url_params)
+        getUrlParametersEditText = view.findViewById(R.id.get_url_params)
+        getUrlParametersButton = view.findViewById(R.id.button_get_url_params)
 
-        getURLParametersButton.setOnClickListener {
-            val text: String = getURLParametersEditText.text.toString()
+        getUrlParametersButton.setOnClickListener {
+            val text: String = getUrlParametersEditText.text.toString()
             wrapper.getUrlParameters(object : GetUrlParametersHandler {
                 override fun onRetrieveParameters(params: Map<String, String>?) {
                     viewLifecycleOwner.lifecycleScope.launch {
                         params?.let {
                             val params = it.entries.iterator().next()
                             val queryItem = params.key + "=" + params.value
-                            getURLParametersEditText.setText(queryItem)
+                            getUrlParametersEditText.setText(queryItem)
                         }
                     }
                 }
