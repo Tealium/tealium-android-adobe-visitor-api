@@ -16,7 +16,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import com.tealium.adobe.api.AdobeAuthState
 import com.tealium.adobe.api.AdobeVisitor
-import com.tealium.adobe.api.GetURLParametersHandler
+import com.tealium.adobe.api.GetUrlParametersHandler
 import com.tealium.adobe.api.ResponseListener
 import com.tealium.adobe.api.UrlDecoratorHandler
 import com.tealium.adobe.wrappers.TealiumWrapper
@@ -113,7 +113,7 @@ class AdobeVisitorFragment(
 
         getURLParametersButton.setOnClickListener {
             val text: String = getURLParametersEditText.text.toString()
-            wrapper.getURLParameters(object : GetURLParametersHandler {
+            wrapper.getURLParameters(object : GetUrlParametersHandler {
                 override fun onRetrieveParameters(params: Map<String, String>?) {
                     viewLifecycleOwner.lifecycleScope.launch {
                         params?.let {

@@ -150,7 +150,7 @@ class AdobeVisitorModule(
         }
     }
 
-    fun getURLParameters(handler: GetURLParametersHandler) {
+    fun getURLParameters(handler: GetUrlParametersHandler) {
         backgroundScope.launch {
             val params = provideParameters()
             val adobeParam = params.entries.iterator().next()
