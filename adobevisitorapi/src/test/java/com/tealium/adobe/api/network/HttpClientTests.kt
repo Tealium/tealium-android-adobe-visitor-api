@@ -20,7 +20,6 @@ import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import java.net.URL
 import java.util.concurrent.ExecutorService
-import java.util.concurrent.Executors
 
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [Build.VERSION_CODES.LOLLIPOP, Build.VERSION_CODES.P])
