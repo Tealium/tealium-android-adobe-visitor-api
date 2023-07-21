@@ -11,6 +11,7 @@ import io.mockk.*
 import io.mockk.impl.annotations.MockK
 import io.mockk.impl.annotations.RelaxedMockK
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.*
 import org.junit.Before
@@ -493,10 +494,13 @@ class AdobeVisitorModuleTests {
             visitorApi = mockAdobeService,
             sharedPreferences = mockSharedPreferences
         )
-
-        val url = adobeVisitorModule.decorateUrl(URL("https://tealium.com/"))
-
-        assertTrue(url.toString().contains(QP_ADOBE_MC, ignoreCase = true))
-        assertTrue(url.toString().contains("/?adobe_mc=MCID%3Decid%7CMCORGID%3DorgId%7CTS%3D", ignoreCase = true))
+        runBlocking {
+            adobeVisitorModule.decorateUrl(URL("https://tealium.com/"), object : UrlDecoratorHandler {
+                override fun onDecorateUrl(url: URL) { url
+                    assertTrue(url.toString().contains(QP_ADOBE_MC, ignoreCase = true))
+                    assertTrue(url.toString().contains("/?adobe_mc=MCID%3Decid%7CMCORGID%3DorgId%7CTS%3D", ignoreCase = true))
+                }
+            })
+        }
     }
 }
