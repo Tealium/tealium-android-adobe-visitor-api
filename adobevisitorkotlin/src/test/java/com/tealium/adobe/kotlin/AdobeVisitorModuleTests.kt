@@ -11,6 +11,7 @@ import io.mockk.*
 import io.mockk.impl.annotations.MockK
 import io.mockk.impl.annotations.RelaxedMockK
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.*
 import org.junit.Before
@@ -100,8 +101,8 @@ class AdobeVisitorModuleTests {
         val adobeVisitorModule =
             AdobeVisitorModule(
                 mockTealiumContext,
-                mockAdobeService,
-                mockSharedPreferences
+                visitorApi = mockAdobeService,
+                sharedPreferences = mockSharedPreferences
             )
 
         assertEquals("orgId", adobeVisitorModule.adobeOrgId)
@@ -113,8 +114,8 @@ class AdobeVisitorModuleTests {
         val adobeVisitorModule =
             AdobeVisitorModule(
                 mockTealiumContext,
-                mockAdobeService,
-                mockSharedPreferences
+                visitorApi = mockAdobeService,
+                sharedPreferences = mockSharedPreferences
             )
 
         assertNull(adobeVisitorModule.adobeOrgId)
@@ -137,8 +138,8 @@ class AdobeVisitorModuleTests {
         val adobeVisitorModule =
             AdobeVisitorModule(
                 mockTealiumContext,
-                mockAdobeService,
-                mockSharedPreferences
+                visitorApi = mockAdobeService,
+                sharedPreferences = mockSharedPreferences
             )
 
         assertNull(adobeVisitorModule.visitor)
@@ -149,8 +150,8 @@ class AdobeVisitorModuleTests {
         val adobeVisitorModule =
             AdobeVisitorModule(
                 mockTealiumContext,
-                mockAdobeService,
-                mockSharedPreferences
+                visitorApi = mockAdobeService,
+                sharedPreferences = mockSharedPreferences
             )
 
         assertSame(mockVisitor, adobeVisitorModule.visitor)
@@ -164,8 +165,8 @@ class AdobeVisitorModuleTests {
         val adobeVisitorModule =
             AdobeVisitorModule(
                 mockTealiumContext,
-                mockAdobeService,
-                mockSharedPreferences
+                visitorApi = mockAdobeService,
+                sharedPreferences = mockSharedPreferences
             )
 
         assertNotNull(adobeVisitorModule.visitor)
@@ -181,8 +182,8 @@ class AdobeVisitorModuleTests {
         val adobeVisitorModule =
             AdobeVisitorModule(
                 mockTealiumContext,
-                mockAdobeService,
-                mockSharedPreferences
+                visitorApi = mockAdobeService,
+                sharedPreferences = mockSharedPreferences
             )
 
         assertNotNull(adobeVisitorModule.visitor)
@@ -200,8 +201,8 @@ class AdobeVisitorModuleTests {
         val adobeVisitorModule =
             AdobeVisitorModule(
                 mockTealiumContext,
-                mockAdobeService,
-                mockSharedPreferences
+                visitorApi = mockAdobeService,
+                sharedPreferences = mockSharedPreferences
             )
 
         verify {
@@ -214,8 +215,8 @@ class AdobeVisitorModuleTests {
         every { mockVisitor.nextRefresh } returns Date(Long.MIN_VALUE)
         AdobeVisitorModule(
             mockTealiumContext,
-            mockAdobeService,
-            mockSharedPreferences
+            visitorApi = mockAdobeService,
+            sharedPreferences = mockSharedPreferences
         )
 
         verify {
@@ -231,8 +232,8 @@ class AdobeVisitorModuleTests {
             val adobeVisitorModule =
                 AdobeVisitorModule(
                     mockTealiumContext,
-                    mockAdobeService,
-                    mockSharedPreferences
+                    visitorApi = mockAdobeService,
+                    sharedPreferences = mockSharedPreferences
                 )
 
             assertEquals(0, adobeVisitorModule.collect().size)
@@ -246,8 +247,8 @@ class AdobeVisitorModuleTests {
             val adobeVisitorModule =
                 AdobeVisitorModule(
                     mockTealiumContext,
-                    mockAdobeService,
-                    mockSharedPreferences
+                    visitorApi = mockAdobeService,
+                    sharedPreferences = mockSharedPreferences
                 )
 
             val data = adobeVisitorModule.collect()
@@ -264,8 +265,8 @@ class AdobeVisitorModuleTests {
             val adobeVisitorModule =
                 AdobeVisitorModule(
                     mockTealiumContext,
-                    mockAdobeService,
-                    mockSharedPreferences
+                    visitorApi = mockAdobeService,
+                    sharedPreferences = mockSharedPreferences
                 )
 
             assertEquals(0, adobeVisitorModule.collect().size)
@@ -285,8 +286,8 @@ class AdobeVisitorModuleTests {
             val adobeVisitorModule =
                 AdobeVisitorModule(
                     mockTealiumContext,
-                    mockAdobeService,
-                    mockSharedPreferences
+                    visitorApi = mockAdobeService,
+                    sharedPreferences = mockSharedPreferences
                 )
 
             assertEquals(1, adobeVisitorModule.collect().size)
@@ -312,8 +313,8 @@ class AdobeVisitorModuleTests {
             val adobeVisitorModule =
                 AdobeVisitorModule(
                     mockTealiumContext,
-                    mockAdobeService,
-                    mockSharedPreferences
+                    visitorApi = mockAdobeService,
+                    sharedPreferences = mockSharedPreferences
                 )
 
             assertEquals(0, adobeVisitorModule.collect().size)
@@ -340,8 +341,8 @@ class AdobeVisitorModuleTests {
             val adobeVisitorModule =
                 AdobeVisitorModule(
                     mockTealiumContext,
-                    mockAdobeService,
-                    mockSharedPreferences
+                    visitorApi = mockAdobeService,
+                    sharedPreferences = mockSharedPreferences
                 )
 
             val data1 = adobeVisitorModule.collect()
@@ -359,8 +360,8 @@ class AdobeVisitorModuleTests {
         val adobeVisitorModule =
             AdobeVisitorModule(
                 mockTealiumContext,
-                mockAdobeService,
-                mockSharedPreferences
+                visitorApi = mockAdobeService,
+                sharedPreferences = mockSharedPreferences
             )
 
         val newVisitor: AdobeVisitor = mockk()
@@ -402,8 +403,8 @@ class AdobeVisitorModuleTests {
         val adobeVisitorModule =
             AdobeVisitorModule(
                 mockTealiumContext,
-                mockAdobeService,
-                mockSharedPreferences
+                visitorApi = mockAdobeService,
+                sharedPreferences = mockSharedPreferences
             )
 
         val capturedListener = slot<ResponseListener<AdobeVisitor>>()
@@ -444,8 +445,8 @@ class AdobeVisitorModuleTests {
         val adobeVisitorModule =
             AdobeVisitorModule(
                 mockTealiumContext,
-                mockAdobeService,
-                mockSharedPreferences
+                visitorApi = mockAdobeService,
+                sharedPreferences = mockSharedPreferences
             )
 
         adobeVisitorModule.resetVisitor()
@@ -464,8 +465,8 @@ class AdobeVisitorModuleTests {
 
         val adobeVisitorModule = AdobeVisitorModule(
             mockTealiumContext,
-            mockAdobeService,
-            mockSharedPreferences
+            visitorApi = mockAdobeService,
+            sharedPreferences = mockSharedPreferences
         )
 
         val encodedParams = adobeVisitorModule.provideParameters()
@@ -490,13 +491,16 @@ class AdobeVisitorModuleTests {
 
         val adobeVisitorModule = AdobeVisitorModule(
             mockTealiumContext,
-            mockAdobeService,
-            mockSharedPreferences
+            visitorApi = mockAdobeService,
+            sharedPreferences = mockSharedPreferences
         )
-
-        val url = adobeVisitorModule.decorateUrl(URL("https://tealium.com/"))
-
-        assertTrue(url.toString().contains(QP_ADOBE_MC, ignoreCase = true))
-        assertTrue(url.toString().contains("/?adobe_mc=MCID%3Decid%7CMCORGID%3DorgId%7CTS%3D", ignoreCase = true))
+        runBlocking {
+            adobeVisitorModule.decorateUrl(URL("https://tealium.com/"), object : UrlDecoratorHandler {
+                override fun onDecorateUrl(url: URL) { url
+                    assertTrue(url.toString().contains(QP_ADOBE_MC, ignoreCase = true))
+                    assertTrue(url.toString().contains("/?adobe_mc=MCID%3Decid%7CMCORGID%3DorgId%7CTS%3D", ignoreCase = true))
+                }
+            })
+        }
     }
 }

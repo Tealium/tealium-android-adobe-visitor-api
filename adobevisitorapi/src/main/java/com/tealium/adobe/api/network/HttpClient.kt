@@ -14,7 +14,7 @@ import javax.net.ssl.HttpsURLConnection
 
 class HttpClient @JvmOverloads constructor(
     context: Context,
-    private val executor: Executor,
+    private val executor: Executor = Executors.newSingleThreadExecutor(),
 ) : NetworkClient {
 
     private val connectivityManager =

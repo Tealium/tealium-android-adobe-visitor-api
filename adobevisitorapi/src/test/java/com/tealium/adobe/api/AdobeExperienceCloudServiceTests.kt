@@ -31,7 +31,7 @@ class AdobeExperienceCloudServiceTests {
 
         visitorApi = AdobeVisitorAPI(
             mockContext,
-            "orgId", mockNetworkClient
+            "orgId", networkClient = mockNetworkClient
         )
     }
 
