@@ -20,6 +20,7 @@ import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import java.net.URL
 import java.util.concurrent.ExecutorService
+import java.util.concurrent.Executors
 
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [Build.VERSION_CODES.LOLLIPOP, Build.VERSION_CODES.P])
@@ -58,7 +59,7 @@ class HttpClientTests {
 
     @Test
     fun isConnected_True_WhenOneNetwork_AndConnected() {
-        val httpClient = HttpClient(mockContext)
+        val httpClient = HttpClient(mockContext, mockExecutor)
         assertTrue(httpClient.isConnected())
     }
 
@@ -68,7 +69,7 @@ class HttpClientTests {
         every { mockConnectivityManager.getNetworkInfo(mockNetwork) } returns mockNetworkInfo
         every { mockNetworkInfo.isConnected } returnsMany listOf(false, true, false)
 
-        val httpClient = HttpClient(mockContext)
+        val httpClient = HttpClient(mockContext, mockExecutor)
         assertTrue(httpClient.isConnected())
     }
 
@@ -78,7 +79,7 @@ class HttpClientTests {
         every { mockConnectivityManager.getNetworkInfo(mockNetwork) } returns mockNetworkInfo
         every { mockNetworkInfo.isConnected } returnsMany listOf(false, false, false)
 
-        val httpClient = HttpClient(mockContext)
+        val httpClient = HttpClient(mockContext, mockExecutor)
         assertFalse(httpClient.isConnected())
     }
 
