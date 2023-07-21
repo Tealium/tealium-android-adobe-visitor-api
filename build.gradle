@@ -4,6 +4,7 @@ buildscript {
     ext.kotlin_coroutines_version = "1.7.2"
     ext.kotlin_coroutines_android_version = "1.7.2"
     ext.robolectric_version = '4.10.3'
+    ext.mockk_version = '1.13.5'
     repositories {
         google()
         mavenCentral()
