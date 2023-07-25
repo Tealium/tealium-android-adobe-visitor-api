@@ -8,6 +8,7 @@ import com.tealium.library.Tealium
 import io.mockk.*
 import io.mockk.impl.annotations.MockK
 import io.mockk.impl.annotations.RelaxedMockK
+import kotlinx.coroutines.runBlocking
 import org.junit.Assert.*
 import org.junit.Before
 import org.junit.Test
@@ -377,7 +378,7 @@ class AdobeVisitorModuleTests {
         )
 
         assertSame(newVisitor, adobeVisitorModule.visitor)
-        verify {
+        verify(timeout = 100) {
             mockAdobeService.linkEcidToKnownIdentifier(
                 "knownId",
                 "ecid",
@@ -425,7 +426,7 @@ class AdobeVisitorModuleTests {
         )
 
         assertSame(mockVisitor, adobeVisitorModule.visitor)
-        verify {
+        verify(timeout = 100) {
             mockAdobeService.linkEcidToKnownIdentifier(
                 "knownId",
                 "ecid",
@@ -455,7 +456,7 @@ class AdobeVisitorModuleTests {
         adobeVisitorModule.resetVisitor()
 
         assertNull(adobeVisitorModule.visitor)
-        verify {
+        verify(timeout = 100) {
             mockSharedPreferences.edit()
             mockEditor.clear()
             mockEditor.apply()
@@ -481,14 +482,15 @@ class AdobeVisitorModuleTests {
         adobeVisitorModule.provideParameters { map ->
             if (map != null) {
                 map["adobe_mc"]?.let {
-                    assertTrue(it[0].contains("MCID=ecid|MCORGID=orgId|TS="))
+                    assertTrue(it[0].contains("MCMID=ecid|MCORGID=orgId|TS="))
                 }
             }
         }
     }
 
+
     @Test
-    fun generateUrlWithVisitorQueryParams() {
+    fun generateUrlWithVisitorQueryParams(): Unit = runBlocking {
         every { AdobeVisitor.fromSharedPreferences(mockSharedPreferences) } returns mockVisitor
 
         val adobeVisitorModule = AdobeVisitorModule(
@@ -502,15 +504,44 @@ class AdobeVisitorModuleTests {
             null,
             null
         )
+        val mockHandler = mockk<UrlDecoratorHandler>(relaxed = true)
+        adobeVisitorModule.decorateUrl(URL("https://tealium.com/"), mockHandler)
 
-        adobeVisitorModule.decorateUrl(URL("https://tealium.com/"), object : UrlDecoratorHandler {
-            override fun onDecorateUrl(url: URL) {
-                assertTrue(url.toString().contains(QP_ADOBE_MC, ignoreCase = true))
-                assertTrue(
-                    url.toString()
-                        .contains("/?adobe_mc=MCID%3Decid%7CMCORGID%3DorgId%7CTS%3D", ignoreCase = true)
-                )
-            }
-        })
+        verify(timeout = 100) {
+            mockHandler.onDecorateUrl(match {
+                val urlString = it.toString()
+                urlString.contains(QP_ADOBE_MC, ignoreCase = false)
+                        && urlString
+                    .contains("/?adobe_mc=MCMID%3Decid%7CMCORGID%3DorgId%7CTS%3D", ignoreCase = false)
+
+            })
+        }
     }
+
+    @Test
+    fun getQueryParameters(): Unit = runBlocking {
+        every { AdobeVisitor.fromSharedPreferences(mockSharedPreferences) } returns mockVisitor
+
+        val adobeVisitorModule = AdobeVisitorModule(
+            adobeOrgId,
+            mockAdobeService,
+            mockSharedPreferences,
+            0,
+            null,
+            null,
+            null,
+            null,
+            null
+        )
+        val mockHandler = mockk<GetUrlParametersHandler>(relaxed = true)
+        adobeVisitorModule.getUrlParameters(mockHandler)
+
+        verify(timeout = 100) {
+            mockHandler.onRetrieveParameters(match {
+                val params = it.entries.iterator().next()
+                params.key == QP_ADOBE_MC && params.value.contains("MCMID=ecid|MCORGID=orgId|TS=")
+            })
+        }
+    }
+
 }

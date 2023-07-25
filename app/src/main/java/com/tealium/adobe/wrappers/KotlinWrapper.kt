@@ -3,6 +3,7 @@ package com.tealium.adobe.wrappers
 import android.app.Application
 import com.tealium.adobe.BuildConfig
 import com.tealium.adobe.api.AdobeVisitor
+import com.tealium.adobe.api.GetUrlParametersHandler
 import com.tealium.adobe.api.ResponseListener
 import com.tealium.adobe.api.UrlDecoratorHandler
 import com.tealium.adobe.kotlin.AdobeVisitor
@@ -62,5 +63,9 @@ class KotlinWrapper(app: Application) : TealiumWrapper {
 
     override fun decorateUrl(url: String, handler: UrlDecoratorHandler) {
         tealium.adobeVisitorApi?.decorateUrl(URL(url), handler)
+    }
+
+    override fun getUrlParameters(handler: GetUrlParametersHandler) {
+        tealium.adobeVisitorApi?.getUrlParameters(handler)
     }
 }

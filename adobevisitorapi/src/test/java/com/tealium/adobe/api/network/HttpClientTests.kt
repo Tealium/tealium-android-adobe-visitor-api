@@ -58,7 +58,7 @@ class HttpClientTests {
 
     @Test
     fun isConnected_True_WhenOneNetwork_AndConnected() {
-        val httpClient = HttpClient(mockContext)
+        val httpClient = HttpClient(mockContext, mockExecutor)
         assertTrue(httpClient.isConnected())
     }
 
@@ -68,7 +68,7 @@ class HttpClientTests {
         every { mockConnectivityManager.getNetworkInfo(mockNetwork) } returns mockNetworkInfo
         every { mockNetworkInfo.isConnected } returnsMany listOf(false, true, false)
 
-        val httpClient = HttpClient(mockContext)
+        val httpClient = HttpClient(mockContext, mockExecutor)
         assertTrue(httpClient.isConnected())
     }
 
@@ -78,7 +78,7 @@ class HttpClientTests {
         every { mockConnectivityManager.getNetworkInfo(mockNetwork) } returns mockNetworkInfo
         every { mockNetworkInfo.isConnected } returnsMany listOf(false, false, false)
 
-        val httpClient = HttpClient(mockContext)
+        val httpClient = HttpClient(mockContext, mockExecutor)
         assertFalse(httpClient.isConnected())
     }
 

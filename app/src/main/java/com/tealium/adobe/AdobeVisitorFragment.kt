@@ -16,6 +16,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import com.tealium.adobe.api.AdobeAuthState
 import com.tealium.adobe.api.AdobeVisitor
+import com.tealium.adobe.api.GetUrlParametersHandler
 import com.tealium.adobe.api.ResponseListener
 import com.tealium.adobe.api.UrlDecoratorHandler
 import com.tealium.adobe.wrappers.TealiumWrapper
@@ -35,7 +36,8 @@ class AdobeVisitorFragment(
 
     private lateinit var decorateUrlEditText: EditText
     private lateinit var decorateUrlButton: Button
-    private var currentUrl: String = "https://www.example.com"
+    private lateinit var getUrlParametersEditText: EditText
+    private lateinit var getUrlParametersButton: Button
 
     private val mainHandler = Handler(Looper.getMainLooper())
 
@@ -92,6 +94,11 @@ class AdobeVisitorFragment(
         decorateUrlButton = view.findViewById(R.id.button_decorate_url)
         decorateUrlButton.setOnClickListener {
             val text: String = decorateUrlEditText.text.toString()
+            try {
+                URL(text)
+            } catch (e: java.lang.Exception){
+                return@setOnClickListener
+            }
             decorateUrl(text, object : UrlDecoratorHandler {
                 override fun onDecorateUrl(url: URL) {
                     viewLifecycleOwner.lifecycleScope.launch {
@@ -99,6 +106,26 @@ class AdobeVisitorFragment(
                     }
                 }
             })
+        }
+
+        getUrlParametersEditText = view.findViewById(R.id.get_url_params)
+        getUrlParametersButton = view.findViewById(R.id.button_get_url_params)
+
+        getUrlParametersButton.setOnClickListener {
+            val text: String = getUrlParametersEditText.text.toString()
+            wrapper.getUrlParameters(object : GetUrlParametersHandler {
+                override fun onRetrieveParameters(params: Map<String, String>?) {
+                    viewLifecycleOwner.lifecycleScope.launch {
+                        params?.let {
+                            val params = it.entries.iterator().next()
+                            val queryItem = params.key + "=" + params.value
+                            getUrlParametersEditText.setText(queryItem)
+                        }
+                    }
+                }
+            })
+
+
         }
 
         updateVisitor(visitor)

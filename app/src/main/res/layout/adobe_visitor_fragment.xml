@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical">
@@ -15,26 +16,51 @@
         android:id="@+id/edit_known_id"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="@string/edit_known_id"/>
+        android:hint="@string/edit_known_id"
+        android:minHeight="48dp"
+        android:importantForAutofill="no"
+        tools:ignore="TextFields,VisualLintTextFieldSize" />
 
     <Button
         android:id="@+id/button_link_existing_ecid"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_margin="8dp"
-        android:text="@string/link_existing_ecid" />
+        android:text="@string/link_existing_ecid"
+        tools:ignore="VisualLintButtonSize" />
 
     <EditText
         android:id="@+id/decorate_url"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="@string/decorate_url"/>
+        android:hint="@string/decorate_url"
+        android:minHeight="48dp"
+        tools:ignore="TextFields,VisualLintTextFieldSize"
+        android:importantForAutofill="no" />
 
     <Button
         android:id="@+id/button_decorate_url"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_margin="8dp"
-        android:text="@string/decorate_url_button" />
+        android:text="@string/decorate_url_button"
+        tools:ignore="VisualLintButtonSize" />
+
+    <EditText
+        android:id="@+id/get_url_params"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="@string/get_url_params"
+        android:minHeight="48dp"
+        tools:ignore="TextFields,VisualLintTextFieldSize"
+        android:importantForAutofill="no" />
+
+    <Button
+        android:id="@+id/button_get_url_params"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="8dp"
+        android:text="@string/get_url_params_button"
+        tools:ignore="VisualLintButtonSize" />
 
 </LinearLayout>

@@ -55,7 +55,7 @@ class HttpClientTestsKitKat {
         every { mockNetworkInfo.isConnected } returns true
         every { mockNetworkInfo.type } returns ConnectivityManager.TYPE_WIFI
 
-        val httpClient = HttpClient(mockContext)
+        val httpClient = HttpClient(mockContext, mockExecutor)
         assertTrue(httpClient.isConnected())
     }
 
@@ -64,7 +64,7 @@ class HttpClientTestsKitKat {
         every { mockNetworkInfo.type } returns ConnectivityManager.TYPE_WIFI
         every { mockNetworkInfo.isConnected } returns false
 
-        val httpClient = HttpClient(mockContext)
+        val httpClient = HttpClient(mockContext, mockExecutor)
         assertFalse(httpClient.isConnected())
     }
 
@@ -73,7 +73,7 @@ class HttpClientTestsKitKat {
         every { mockNetworkInfo.isConnected } returns true
         every { mockNetworkInfo.type } returns ConnectivityManager.TYPE_BLUETOOTH
 
-        val httpClient = HttpClient(mockContext)
+        val httpClient = HttpClient(mockContext, mockExecutor)
         assertFalse(httpClient.isConnected())
     }
 }
