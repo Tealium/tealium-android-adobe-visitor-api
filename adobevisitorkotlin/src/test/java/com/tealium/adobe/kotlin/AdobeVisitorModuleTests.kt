@@ -534,6 +534,26 @@ class AdobeVisitorModuleTests {
     }
 
     @Test
+    fun generateUrlWithVisitorQueryParamsWithNullAdobeVisitor(): Unit = runBlocking {
+        every { AdobeVisitor.fromSharedPreferences(mockSharedPreferences) } returns null
+
+        val adobeVisitorModule = AdobeVisitorModule(
+            mockTealiumContext,
+            visitorApi = mockAdobeService,
+            sharedPreferences = mockSharedPreferences
+        )
+        val mockHandler = mockk<UrlDecoratorHandler>(relaxed = true)
+        adobeVisitorModule.decorateUrl(URL("https://tealium.com/"), mockHandler)
+
+        verify(timeout = 100) {
+            mockHandler.onDecorateUrl(match {
+                val urlString = it.toString()
+                urlString.equals("https://tealium.com/", false)
+            })
+        }
+    }
+
+    @Test
     fun getQueryParameters(): Unit = runBlocking {
         every { AdobeVisitor.fromSharedPreferences(mockSharedPreferences) } returns mockVisitor
 

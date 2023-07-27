@@ -139,24 +139,25 @@ class AdobeVisitorModule(
 
             if (params.isEmpty()) {
                 handler.onDecorateUrl(url)
-            }
-
-            params.forEach { entry ->
-                entry.value.forEach { value ->
-                    uriBuilder.appendQueryParameter(entry.key, value)
+            } else {
+                params.forEach { entry ->
+                    entry.value.forEach { value ->
+                        uriBuilder.appendQueryParameter(entry.key, value)
+                    }
                 }
+                handler.onDecorateUrl(URL(uriBuilder.build().toString()))
             }
-            handler.onDecorateUrl(URL(uriBuilder.build().toString()))
         }
     }
 
     fun getUrlParameters(handler: GetUrlParametersHandler) {
         backgroundScope.launch {
             val params = provideParameters()
-            val iterator = params.entries.iterator()
-            if (iterator.hasNext()) {
-                val adobeParam = iterator.next()
-                handler.onRetrieveParameters(mapOf(adobeParam.key to adobeParam.value.first()))
+            if (params.entries.isNotEmpty()) {
+                params.entries.forEach {
+                    handler.onRetrieveParameters(mapOf(it.key to it.value.first()))
+                    return@forEach
+                }
             } else {
                 handler.onRetrieveParameters(null)
             }
