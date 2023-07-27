@@ -214,6 +214,10 @@ public final class AdobeVisitorModule implements PopulateDispatchListener, Query
 
     public void getUrlParameters(GetUrlParametersHandler handler) {
         provideParameters(map -> {
+            if (map == null || map.isEmpty()) {
+                handler.onRetrieveParameters(null);
+                return;
+            }
             // Only retrieves the 1st query param,
             // since Adobe Visitor API puts everything in a single param
                 for (Map.Entry<String, String[]> entry : map.entrySet()) {

@@ -544,4 +544,27 @@ class AdobeVisitorModuleTests {
         }
     }
 
+    @Test
+    fun getQueryParametersNullAdobeVisitor(): Unit = runBlocking {
+        every { AdobeVisitor.fromSharedPreferences(mockSharedPreferences) } returns null
+
+        val adobeVisitorModule = AdobeVisitorModule(
+            adobeOrgId,
+            mockAdobeService,
+            mockSharedPreferences,
+            0,
+            null,
+            null,
+            null,
+            null,
+            null
+        )
+        val mockHandler = mockk<GetUrlParametersHandler>(relaxed = true)
+        adobeVisitorModule.getUrlParameters(mockHandler)
+
+        verify(timeout = 100) {
+            mockHandler.onRetrieveParameters(matchNullable { it.isNullOrEmpty() })
+        }
+    }
+
 }
