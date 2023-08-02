@@ -38,10 +38,19 @@ class AdobeVisitorModuleTests {
     lateinit var mockTealiumContext: TealiumContext
 
     @MockK
+    lateinit var mockTealiumContextNullVisitor: TealiumContext
+
+    @MockK
     lateinit var mockConfig: TealiumConfig
 
     @MockK
+    lateinit var mockConfigNullVisitor: TealiumConfig
+
+    @MockK
     lateinit var mockVisitor: AdobeVisitor
+
+    @MockK
+    var mockNullVisitor: AdobeVisitor? = null
 
     @RelaxedMockK
     lateinit var mockAdobeListener: ResponseListener<AdobeVisitor>
@@ -54,6 +63,7 @@ class AdobeVisitorModuleTests {
         MockKAnnotations.init(this)
 
         every { mockTealiumContext.config } returns mockConfig
+        every { mockTealiumContextNullVisitor.config } returns mockConfigNullVisitor
         every { mockSharedPreferences.edit() } returns mockEditor
         every { mockEditor.putString(any(), any()) } returns mockEditor
         every { mockEditor.putInt(any(), any()) } returns mockEditor
@@ -69,12 +79,28 @@ class AdobeVisitorModuleTests {
         every { mockConfig.adobeVisitorAuthState } returns null
         every { mockConfig.adobeVisitorCustomVisitorId } returns null
         every { mockConfig.adobeVisitorExecutor } returns null
+
+        // Default orgId set correctly.
+        every { mockConfigNullVisitor.adobeVisitorOrgId } returns "orgId"
+        every { mockConfigNullVisitor.adobeVisitorRetries } returns 0
+        every { mockConfigNullVisitor.adobeVisitorExistingEcid } returns null
+        every { mockConfigNullVisitor.adobeVisitorDataProviderId } returns null
+        every { mockConfigNullVisitor.adobeVisitorAuthState } returns null
+        every { mockConfigNullVisitor.adobeVisitorCustomVisitorId } returns null
+        every { mockConfigNullVisitor.adobeVisitorExecutor } returns null
+
         // Default known AdobeVisitor.
         every { mockVisitor.experienceCloudId } returns "ecid"
         every { mockVisitor.idSyncTTL } returns 100
         every { mockVisitor.region } returns 1
         every { mockVisitor.blob } returns "blob"
         every { mockVisitor.nextRefresh } returns Date(Long.MAX_VALUE)
+
+        every { mockNullVisitor?.experienceCloudId } returns "ecid"
+        every { mockNullVisitor?.idSyncTTL } returns 100
+        every { mockNullVisitor?.region } returns 1
+        every { mockNullVisitor?.blob } returns "blob"
+        every { mockNullVisitor?.nextRefresh } returns Date(Long.MAX_VALUE)
 
         every { mockTealiumContext.events } returns mockMessengerService
 
@@ -508,6 +534,26 @@ class AdobeVisitorModuleTests {
     }
 
     @Test
+    fun generateUrlWithVisitorQueryParamsWithNullAdobeVisitor(): Unit = runBlocking {
+        every { AdobeVisitor.fromSharedPreferences(mockSharedPreferences) } returns null
+
+        val adobeVisitorModule = AdobeVisitorModule(
+            mockTealiumContext,
+            visitorApi = mockAdobeService,
+            sharedPreferences = mockSharedPreferences
+        )
+        val mockHandler = mockk<UrlDecoratorHandler>(relaxed = true)
+        adobeVisitorModule.decorateUrl(URL("https://tealium.com/"), mockHandler)
+
+        verify(timeout = 100) {
+            mockHandler.onDecorateUrl(match {
+                val urlString = it.toString()
+                urlString.equals("https://tealium.com/", false)
+            })
+        }
+    }
+
+    @Test
     fun getQueryParameters(): Unit = runBlocking {
         every { AdobeVisitor.fromSharedPreferences(mockSharedPreferences) } returns mockVisitor
 
@@ -527,4 +573,20 @@ class AdobeVisitorModuleTests {
         }
     }
 
+    @Test
+    fun getQueryParametersWithNullAdobeVisitor(): Unit = runBlocking {
+        every { AdobeVisitor.fromSharedPreferences(mockSharedPreferences) } returns null
+
+        val adobeVisitorModule = AdobeVisitorModule(
+            mockTealiumContextNullVisitor,
+            visitorApi = mockAdobeService,
+            sharedPreferences = mockSharedPreferences
+        )
+        val mockHandler = mockk<GetUrlParametersHandler>(relaxed = true)
+        adobeVisitorModule.getUrlParameters(mockHandler)
+
+        verify(timeout = 100) {
+            mockHandler.onRetrieveParameters(matchNullable { it.isNullOrEmpty() })
+        }
+    }
 }

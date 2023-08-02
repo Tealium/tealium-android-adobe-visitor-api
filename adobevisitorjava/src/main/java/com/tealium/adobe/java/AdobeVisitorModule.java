@@ -195,35 +195,39 @@ public final class AdobeVisitorModule implements PopulateDispatchListener, Query
         provideParameters(map -> {
             if (map == null || map.isEmpty()) {
                 handler.onDecorateUrl(url);
-            }
-
-            try {
-                final Uri.Builder uriBuilder = Uri.parse(url.toURI().toString()).buildUpon();
-                for (Map.Entry<String, String[]> entry : map.entrySet()) {
-                    for (String item : entry.getValue()) {
-                        uriBuilder.appendQueryParameter(entry.getKey(), item);
+            } else {
+                try {
+                    final Uri.Builder uriBuilder = Uri.parse(url.toURI().toString()).buildUpon();
+                    for (Map.Entry<String, String[]> entry : map.entrySet()) {
+                        for (String item : entry.getValue()) {
+                            uriBuilder.appendQueryParameter(entry.getKey(), item);
+                        }
                     }
+                    handler.onDecorateUrl(new URL(uriBuilder.build().toString()));
+                } catch (MalformedURLException | URISyntaxException e) {
+                    Log.d(BuildConfig.TAG, "Error decorating URL: " + e.getMessage());
+                    handler.onDecorateUrl(url);
                 }
-                handler.onDecorateUrl(new URL(uriBuilder.build().toString()));
-            } catch (MalformedURLException | URISyntaxException e) {
-                Log.d(BuildConfig.TAG, "Error decorating URL: " + e.getMessage());
-                handler.onDecorateUrl(url);
             }
         });
     }
 
     public void getUrlParameters(GetUrlParametersHandler handler) {
         provideParameters(map -> {
+            if (map == null || map.isEmpty()) {
+                handler.onRetrieveParameters(null);
+                return;
+            }
             // Only retrieves the 1st query param,
             // since Adobe Visitor API puts everything in a single param
-                for (Map.Entry<String, String[]> entry : map.entrySet()) {
-                    for (String item : entry.getValue()) {
-                        Map<String, String> adobeParams = new HashMap<>();
-                        adobeParams.put(entry.getKey(), item);
-                        handler.onRetrieveParameters(adobeParams);
-                        break;
-                    }
+            for (Map.Entry<String, String[]> entry : map.entrySet()) {
+                for (String item : entry.getValue()) {
+                    Map<String, String> adobeParams = new HashMap<>();
+                    adobeParams.put(entry.getKey(), item);
+                    handler.onRetrieveParameters(adobeParams);
+                    break;
                 }
+            }
         });
     }
 

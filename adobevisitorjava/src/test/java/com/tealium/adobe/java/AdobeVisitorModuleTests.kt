@@ -517,6 +517,31 @@ class AdobeVisitorModuleTests {
             })
         }
     }
+    @Test
+    fun generateUrlWithVisitorQueryParamsWithNullAdobeVisitor(): Unit = runBlocking {
+        every { AdobeVisitor.fromSharedPreferences(mockSharedPreferences) } returns null
+
+        val adobeVisitorModule = AdobeVisitorModule(
+            adobeOrgId,
+            mockAdobeService,
+            mockSharedPreferences,
+            0,
+            null,
+            null,
+            null,
+            null,
+            null
+        )
+        val mockHandler = mockk<UrlDecoratorHandler>(relaxed = true)
+        adobeVisitorModule.decorateUrl(URL("https://tealium.com/"), mockHandler)
+
+        verify(timeout = 100) {
+            mockHandler.onDecorateUrl(match {
+                val urlString = it.toString()
+                urlString.equals("https://tealium.com/", false)
+            })
+        }
+    }
 
     @Test
     fun getQueryParameters(): Unit = runBlocking {
@@ -541,6 +566,29 @@ class AdobeVisitorModuleTests {
                 val params = it.entries.iterator().next()
                 params.key == QP_ADOBE_MC && params.value.contains("MCMID=ecid|MCORGID=orgId|TS=")
             })
+        }
+    }
+
+    @Test
+    fun getQueryParametersNullAdobeVisitor(): Unit = runBlocking {
+        every { AdobeVisitor.fromSharedPreferences(mockSharedPreferences) } returns null
+
+        val adobeVisitorModule = AdobeVisitorModule(
+            adobeOrgId,
+            mockAdobeService,
+            mockSharedPreferences,
+            0,
+            null,
+            null,
+            null,
+            null,
+            null
+        )
+        val mockHandler = mockk<GetUrlParametersHandler>(relaxed = true)
+        adobeVisitorModule.getUrlParameters(mockHandler)
+
+        verify(timeout = 100) {
+            mockHandler.onRetrieveParameters(matchNullable { it.isNullOrEmpty() })
         }
     }
 
